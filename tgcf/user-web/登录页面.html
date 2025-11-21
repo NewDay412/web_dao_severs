@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:3003 https://longlong.baby https://dao.longlong.baby http://47.83.203.60;"
+    />
+    <title>登录页面 - 天官赐福</title>
+    <script>
+
+    </script>
+    <link
+      href="../css/bootstrap.min.css"
+    <script src=" /js/responsive-navigation.js></script>
+      rel="stylesheet"
+      onerror="handleResourceError(this)"
+    />
+    <link
+      rel="stylesheet"
+      href="/icons-1.11.1/font/bootstrap-icons.min.css"
+      onerror="handleResourceError(this)"
+    />
+    <link href="../css/responsive-enhanced.css" rel="stylesheet" onerror="handleResourceError(this)" />
+    <link href=" /css/responsive-navbar.css rel=stylesheet>
+    
+    <!-- Cloudflare Web Analytics -->
+    <script>
+        /**
+         * 加载Cloudflare统计脚本，添加错误处理
+         */
+        function loadCloudflareAnalytics() {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+            script.setAttribute('data-cf-beacon', '{"token": "9d08e7125dd044f5b53ec94bb4c29d14"}');
+            
+            // 添加错误处理
+            script.onerror = function() {
+                if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+                    console.warn('Cloudflare统计脚本加载失败，不影响网站功能');
+                }
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // 延迟加载统计脚本，避免阻塞页面渲染
+        window.addEventListener('load', function() {
+            setTimeout(loadCloudflareAnalytics, 1000);
+        });
+    </script>
+    <style>
+      /* 核心变量：与注册页保持一致，确保风格统一 */
+      :root {
+        --primary: #5b7cff;
+        --primary-light: rgba(91, 124, 255, 0.1);
+        --success: #2dd4bf;
+        --error: #f87171;
+        --neutral-50: #fafafa;
+        --neutral-100: #f5f5f5;
+        --neutral-200: #e5e5e5;
+        --neutral-700: #404040;
+        --neutral-900: #171717;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+        --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        --radius: 12px;
+        --transition: all 0.25s ease-in-out;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        background-color: var(--neutral-50);
+        font-family: "Inter", "PingFang SC", "微软雅黑", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        color: var(--neutral-900);
+      }
+
+      /* 背景装饰：与注册页统一纹理 */
+      .bg-texture {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(
+          var(--primary) 0.3px,
+          transparent 0.3px
+        );
+        background-size: 50px 50px;
+        opacity: 0.04;
+        z-index: -1;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 480px;
+        padding: 0 16px;
+      }
+
+      /* 标题区域：保持注册页风格 */
+      .page-title {
+        text-align: center;
+        margin-bottom: 40px;
+        font-weight: 600;
+        font-size: 26px;
+        letter-spacing: -0.3px;
+        color: var(--neutral-900);
+      }
+
+      /* 表单容器：与注册页一致的卡片感 */
+      .login-form {
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 48px 32px;
+        transition: var(--transition);
+      }
+
+      .login-form:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      /* 表单组：复用注册页样式，保证一致性 */
+      .form-group {
+        margin-bottom: 28px;
+        position: relative;
+      }
+
+      /* 密码输入框包装器 */
+      .password-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .password-input-wrapper .form-control {
+        padding-right: 50px;
+      }
+
+      /* 密码切换按钮 */
+      .password-toggle {
+        position: absolute;
+        right: 15px;
+        background: none;
+        border: none;
+        color: var(--neutral-400);
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+      }
+
+      .password-toggle:hover {
+        color: var(--primary);
+      }
+
+      .password-toggle i {
+        font-size: 16px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--neutral-700);
+        transition: var(--transition);
+      }
+
+      .form-control {
+        width: 100%;
+        height: 52px;
+        padding: 0 20px;
+        border: 1px solid var(--neutral-200);
+        border-radius: 8px;
+        font-size: 15px;
+        color: var(--neutral-900);
+        background-color: var(--neutral-50);
+        transition: var(--transition);
+        outline: none;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary);
+        background-color: white;
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+
+      .form-control::placeholder {
+        color: var(--neutral-400);
+        opacity: 1;
+      }
+
+      /* 记住密码 & 忘记密码：新增模块，风格统一 */
+      .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        font-size: 14px;
+      }
+
+      .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--neutral-700);
+        cursor: pointer;
+      }
+
+      .remember-me input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
+      }
+
+      .forgot-password {
+        color: var(--primary);
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .forgot-password:hover {
+        color: #4a6eff;
+        text-decoration: underline;
+      }
+
+      /* 按钮区域：与注册页一致 */
+      .btn-group {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .btn {
+        flex: 1;
+        height: 52px;
+        border-radius: 8px;
+        border: none;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #4a6eff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(91, 124, 255, 0.3);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-secondary {
+        background-color: var(--neutral-100);
+        color: var(--neutral-700);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--neutral-200);
+      }
+
+      /* 注册入口：底部引导，风格统一 */
+      .register-link {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 14px;
+        color: var(--neutral-700);
+      }
+
+      .register-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+      }
+
+      .register-link a:hover {
+        color: #4a6eff;
+        text-decoration: underline;
+      }
+
+      /* 验证反馈：与注册页一致 */
+      .form-control.is-invalid {
+        border-color: var(--error);
+        box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
+        animation: shake 0.4s ease-in-out;
+      }
+
+      .error-message {
+        display: none;
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--error);
+        line-height: 1.4;
+      }
+
+      .error-message.show {
+        display: block;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      /* 成功弹窗：与注册页风格统一 */
+      .success-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+      }
+
+      .success-modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal-content {
+        background-color: white;
+        border-radius: var(--radius);
+        padding: 40px 32px;
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        transform: translateY(20px);
+        transition: var(--transition);
+      }
+
+      .success-modal.show .modal-content {
+        transform: translateY(0);
+      }
+
+      .modal-icon {
+        font-size: 56px;
+        color: var(--success);
+        margin-bottom: 20px;
+      }
+
+      .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--neutral-900);
+      }
+
+      .modal-desc {
+        font-size: 14px;
+        color: var(--neutral-700);
+        margin-bottom: 28px;
+        line-height: 1.6;
+      }
+
+      .modal-btn {
+        width: 100%;
+        height: 52px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .modal-btn:hover {
+        background-color: #4a6eff;
+      }
+
+      /* 动画：与注册页一致 */
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20%,
+        60% {
+          transform: translateX(-3px);
+        }
+        40%,
+        80% {
+          transform: translateX(3px);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* 响应式：与注册页保持一致 */
+      @media (max-width: 480px) {
+        .login-form {
+          padding: 36px 24px;
+        }
+
+        .page-title {
+          margin-bottom: 32px;
+          font-size: 24px;
+        }
+
+        .form-group {
+          margin-bottom: 24px;
+        }
+
+        .form-actions {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          margin-bottom: 28px;
+        }
+
+        .btn-group {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .form-control,
+        .btn,
+        .modal-btn {
+          height: 48px;
+        }
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <div class="bg-texture"></div>
+    <div class="container container-responsive">
+      <h1 class="page-title fs-3xl-responsive text-center-responsive">
+        账号登录
+      </h1>
+      <form
+        class="login-form card-responsive"
+        action="/api/login"
+        method="post"
+        id="loginForm"
+        onsubmit="return validateLoginForm()"
+      >
+        <!-- 用户名 -->
+        <div class="form-group">
+          <label class="form-label" for="username">
+            <i class="bi bi-person me-2"></i>用户名
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="请输入用户名"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- 密码 -->
+        <div class="form-group">
+          <label class="form-label" for="password">
+            <i class="bi bi-lock me-2"></i>密码
+          </label>
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              name="password"
+              placeholder="请输入密码"
+              autocomplete="current-password"
+            />
+            <button type="button" class="password-toggle" onclick="togglePassword('password')">
+              <i class="bi bi-eye" id="password-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 记住密码 & 忘记密码 -->
+        <div class="form-actions">
+          <label class="remember-me">
+            <input type="checkbox" name="remember" id="remember" />
+            记住我（7天内自动登录）
+          </label>
+          <a href="#" class="forgot-password">忘记密码？</a>
+        </div>
+
+        <!-- 按钮组 -->
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">登录</button>
+          <button
+            type="reset"
+            class="btn btn-secondary"
+            onclick="resetFormState()"
+          >
+            重置
+          </button>
+        </div>
+
+        <!-- 注册引导 -->
+        <div class="register-link">
+          还没有账号？<a href="/user-web/注册.html">立即注册</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- 登录成功弹窗 -->
+    <div class="success-modal" id="successModal">
+      <div class="modal-content">
+        <i class="bi bi-check-circle modal-icon"></i>
+        <h3 class="modal-title">登录成功！</h3>
+        <p class="modal-desc">欢迎回来，3秒后自动跳转到首页</p>
+        <button class="modal-btn" onclick="closeModal()">立即跳转</button>
+      </div>
+    </div>
+
+    <!-- 错误弹窗 -->
+    <div class="success-modal" id="errorModal">
+      <div class="modal-content">
+        <i
+          class="bi bi-exclamation-circle modal-icon"
+          style="color: var(--error)"
+        ></i>
+        <h3 class="modal-title" id="errorTitle">登录失败</h3>
+        <p class="modal-desc" id="errorMessage">请检查输入信息</p>
+        <button
+          class="modal-btn"
+          onclick="closeErrorModal()"
+          style="background-color: var(--error)"
+        >
+          知道了
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // 表单验证逻辑
+      function validateLoginForm() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+
+        if (username === "") {
+          showErrorModal("输入错误", "请输入用户名");
+          return false;
+        }
+
+        if (password === "") {
+          showErrorModal("输入错误", "请输入密码");
+          return false;
+        }
+
+        submitLogin(username, password);
+        return false;
+      }
+
+      // 显示错误弹窗
+      function showErrorModal(title, message) {
+        document.getElementById("errorTitle").textContent = title;
+        document.getElementById("errorMessage").textContent = message;
+        document.getElementById("errorModal").classList.add("show");
+      }
+
+      // 关闭错误弹窗
+      function closeErrorModal() {
+        document.getElementById("errorModal").classList.remove("show");
+      }
+
+      // 重置表单状态
+      function resetFormState() {
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("remember").checked = false;
+      }
+
+      // 提交登录请求
+      async function submitLogin(username, password) {
+        try {
+          // 使用相对路径的登录接口
+          const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            // 检查用户角色
+            const isAdmin = result.user?.role === 'admin';
+            
+            // 清除旧的登录信息
+            localStorage.removeItem("admin_token");
+            localStorage.removeItem("admin_user");
+            localStorage.removeItem("admin_role");
+            localStorage.removeItem("user_token");
+            localStorage.removeItem("user_user");
+            localStorage.removeItem("user_role");
+
+            // 存储登录信息 - 使用不同的键名区分管理员和普通用户
+            if (isAdmin) {
+              localStorage.setItem("admin_token", result.token);
+              localStorage.setItem(
+                "admin_user",
+                JSON.stringify(result.user),
+              );
+              localStorage.setItem("admin_role", "admin");
+            } else {
+              localStorage.setItem("user_token", result.token);
+              localStorage.setItem(
+                "user_user",
+                JSON.stringify(result.user),
+              );
+              localStorage.setItem("user_role", "user");
+            }
+
+            // 记住密码逻辑
+            if (document.getElementById("remember").checked) {
+              localStorage.setItem("rememberedUser", username);
+              localStorage.setItem("remembered", "true");
+            } else {
+              localStorage.removeItem("rememberedUser");
+              localStorage.removeItem("remembered");
+            }
+
+            // 显示成功弹窗并跳转
+            document.getElementById("successModal").classList.add("show");
+            setTimeout(() => {
+              // 使用相对路径跳转
+              if (isAdmin) {
+                window.location.href = "/admin-web/admin.html";
+              } else {
+                window.location.href = "/user-web/天官赐福首页.html";
+              }
+            }, 3003);
+          } else {
+            // 登录失败：根据状态码显示不同错误信息
+            if (response.status === 404) {
+              showErrorModal("用户不存在", "该用户不存在，请注册");
+            } else if (response.status === 401) {
+              showErrorModal("登录失败", "用户名或密码错误");
+            } else {
+              showErrorModal(
+                "登录失败",
+                result.message || "登录失败，请稍后重试",
+              );
+            }
+          }
+        } catch (error) {
+          console.error("登录请求失败:", error);
+          showErrorModal("网络错误", "登录失败，请检查网络连接");
+        }
+      }
+
+      // 关闭弹窗并跳转
+      function closeModal() {
+        document.getElementById("successModal").classList.remove("show");
+        const isAdmin = localStorage.getItem("admin_role") === "admin";
+        if (isAdmin) {
+          window.location.href = "/admin-web/admin.html";
+        } else {
+          window.location.href = "/user-web/天官赐福首页.html";
+        }
+      }
+
+      // 页面加载时：自动填充记住的用户名
+      window.onload = function () {
+        if (localStorage.getItem("remembered") === "true") {
+          const rememberedUser = localStorage.getItem("rememberedUser");
+          if (rememberedUser) {
+            document.getElementById("username").value = rememberedUser;
+            document.getElementById("remember").checked = true;
+          }
+        }
+      };
+
+      // 密码可见性切换
+      function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const eyeIcon = document.getElementById(inputId + '-eye');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          eyeIcon.className = 'bi bi-eye-slash';
+        } else {
+          input.type = 'password';
+          eyeIcon.className = 'bi bi-eye';
+        }
+      }
+
+      /**
+       * 资源加载失败处理函数
+       * @param {HTMLElement} element - 加载失败的DOM元素
+       */
+      function handleResourceError(element) {
+        console.warn(`资源加载失败: ${element.href}`);
+        element.style.display = "none";
+        
+        // 尝试备用路径
+        
+         if (element && element.tagName === 'LINK') {
+          const href = element.getAttribute('href');
+          if (href && href.includes('bootstrap.min.css')) {
+            element.href = '/css/bootstrap.min.css';
+          } else if (href && href.includes('bootstrap-icons.min.css')) {
+            element.href = '/icons-1.11.1/font/bootstrap-icons.min.css';
+          } else if (href && href.includes('responsive-enhanced.css')) {
+            element.href = '/css/responsive-enhanced.css';
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

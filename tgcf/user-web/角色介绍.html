@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:3003 https://longlong.baby https://dao.longlong.baby http://47.83.203.60;">
+    <title>天官赐福 - 角色介绍</title>
+    
+    <script>
+        function resourceLoadError(element) {
+            console.warn('资源加载失败:', element.src || element.href);
+            
+            // 为CSS文件提供备用路径
+            if (element.href && element.href.includes('bootstrap.min.css')) {
+                element.href = '/bootstrap-5.3.2/dist/css/bootstrap.min.css';
+            } else if (element.href && element.href.includes('bootstrap-icons.min.css')) {
+                element.href = '/icons-1.11.1/font/bootstrap-icons.min.css';
+            }
+            
+            // 为JS文件提供备用路径
+            if (element.src && element.src.includes('bootstrap.bundle.min.js')) {
+                element.src = '/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js';
+            } else if (element.src && element.src.includes('jquery-3.6.0.min.js')) {
+                element.src = '../js/jquery-3.6.0.min.js';
+            }
+        }
+    </script>
+    
+    <link href="/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" onerror="resourceLoadError(this)">
+    <link rel="stylesheet" href="/icons-1.11.1/font/bootstrap-icons.min.css" onerror="resourceLoadError(this)">
+    <link href="/css/responsive-enhanced.css" rel="stylesheet">
+    
+    <!-- Cloudflare Web Analytics -->
+    <script>
+        /**
+         * 加载Cloudflare统计脚本，添加错误处理
+         */
+        function loadCloudflareAnalytics() {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+            script.setAttribute('data-cf-beacon', '{"token": "9d08e7125dd044f5b53ec94bb4c29d14"}');
+            
+            // 添加错误处理
+            script.onerror = function() {
+                if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+                    console.warn('Cloudflare统计脚本加载失败，不影响网站功能');
+                }
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // 延迟加载统计脚本，避免阻塞页面渲染
+        window.addEventListener('load', function() {
+            setTimeout(loadCloudflareAnalytics, 1000);
+        });
+    </script>
+    
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: "微软雅黑", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f5f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏样式 - 与首页保持一致 */
+        .navbar-container {
+            background: linear-gradient(135deg, #9e2a2b 0%, #b83234 100%);
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(158, 42, 43, 0.3);
+            position: relative;
+            z-index: 1000;
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(158, 42, 43, 0.3);
+            position: relative;
+        }
+        
+        .navbar-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #f9d71c, transparent);
+        }
+        
+        .navbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 80px;
+            background: transparent !important;
+        }
+        
+        .logo {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+        
+        /* Bootstrap导航栏链接样式 */
+        .navbar-nav .nav-link {
+            color: #FFFFFF !important;
+            font-size: 16px;
+            padding: 8px 15px;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        /* 导航链接按钮样式 - 优化版 */
+        .navbar-nav .nav-link {
+            position: relative;
+            border-radius: 20px;
+            margin: 0 5px;
+            padding: 8px 20px !important;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background: rgba(249, 215, 28, 0.1);
+            border-color: rgba(249, 215, 28, 0.3);
+            color: #f9d71c !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249, 215, 28, 0.2);
+        }
+        
+        .navbar-nav .nav-link:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(249, 215, 28, 0.3);
+        }
+        
+        /* 金色下划线效果 */
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 15px;
+            right: 15px;
+            background: linear-gradient(90deg, #f9d71c, #ffeb3b);
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+        
+        .navbar-nav .nav-link:hover::after {
+            width: calc(100% - 30px);
+        }
+        
+        /* 导航栏切换按钮样式 - 优化版 */
+        .navbar-toggler {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-toggler:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.3rem rgba(249, 215, 28, 0.3);
+            outline: none;
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            width: 24px;
+            height: 24px;
+        }
+        
+        /* 解决导航栏展开时无法滚动的问题 */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                background-color: #9e2a2b;
+                padding: 15px;
+                border-radius: 0 0 8px 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            
+            .navbar-nav {
+                margin: 0;
+            }
+            
+            .nav-item {
+                margin: 5px 0;
+            }
+            
+            .nav-link {
+                padding: 10px 15px !important;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+            
+            .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+        
+        /* 头部横幅样式 */
+        .banner {
+            height: 400px;
+            background: /*linear-gradient(rgba(158, 42, 43, 0.7), rgba(184, 50, 52, 0.7)), */
+                        url('../img/c3.jpg') center center no-repeat;
+            background-size: cover;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+        
+        .banner-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .banner-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+        
+        .banner-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* 内容区域样式 */
+        .content-section {
+            padding: 80px 0;
+            flex: 1;
+        }
+        
+        .section-title {
+            font-size: 2.8rem;
+            color: #9e2a2b;
+            margin-bottom: 50px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #9e2a2b, #f9d71c, #9e2a2b);
+            border-radius: 2px;
+        }
+        
+        /* 角色卡片样式 */
+        .character-card {
+            background: linear-gradient(145deg, #ffffff, #f8f5f5);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(158, 42, 43, 0.15);
+            margin-bottom: 40px;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(158, 42, 43, 0.1);
+        }
+        
+        .character-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(158, 42, 43, 0.25);
+            border-color: rgba(158, 42, 43, 0.3);
+        }
+        
+        .character-img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        
+        .character-card:hover .character-img {
+            transform: scale(1.05);
+        }
+        
+        .character-info {
+            padding: 30px;
+            position: relative;
+        }
+        
+        .character-name {
+            font-size: 1.8rem;
+            color: #9e2a2b;
+            margin-bottom: 20px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .character-name::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, #f9d71c, #ffeb3b);
+            border-radius: 1px;
+        }
+        
+        .character-desc {
+            color: #666;
+            text-align: justify;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        /* 人物语录样式 */
+        .quotes-container {
+            background: linear-gradient(145deg, #fff8f0 0%, #faf5f0 100%);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #deb887;
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.1);
+        }
+        
+        .character-quotes {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #fff;
+            border-radius: 15px;
+            border-left: 5px solid #9e2a2b;
+            box-shadow: 0 5px 15px rgba(158, 42, 43, 0.1);
+        }
+        
+        .character-quotes:last-child {
+            margin-bottom: 0;
+        }
+        
+        .quotes-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .quotes-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #f9d71c;
+        }
+        
+        .quotes-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #9e2a2b;
+            margin: 0;
+        }
+        
+        .quotes-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+            white-space: pre-line;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .banner-title {
+                font-size: 2.5rem;
+            }
+            
+            .banner-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+            
+            .character-info {
+                padding: 20px;
+            }
+            
+            .character-name {
+                font-size: 1.5rem;
+            }
+            
+            .quotes-container {
+                padding: 25px 20px;
+            }
+            
+            .character-quotes {
+                padding: 20px 15px;
+            }
+            
+            .quotes-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .quotes-name {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="navbar-container navbar-responsive">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand logo" href="/user-web/天官赐福首页.html">
+                    <img src="../img/cf.png" alt="Logo">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item" id="loginItem">
+                            <a class="nav-link" href="/user-web/登录页面.html">登录</a>
+                        </li>
+                        <li class="nav-item" id="registerItem">
+                            <a class="nav-link" href="/user-web/注册.html">注册</a>
+                        </li>
+                        <li class="nav-item" id="userInfo" style="display:none;">
+                            <span class="nav-link text-warning" id="welcomeText"></span>
+                        </li>
+                        <li class="nav-item" id="logoutItem" style="display:none;">
+                            <a class="nav-link" href="#" onclick="logout()">退出</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-web/天官赐福首页.html">网站详情</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-web/天官赐福首页.html">剧情简介</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-web/角色介绍.html">角色介绍</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-web/天官赐福首页.html">作品评价</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-web/留言板.html">留言板</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="checkLoginForChat(); return false;">在线聊天</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- 横幅 -->
+    <div class="banner">
+        <div class="banner-content">
+            <h1 class="banner-title">天官赐福</h1>
+            <p class="banner-subtitle">探索仙乐国传奇人物的精彩故事</p>
+        </div>
+    </div>
+    
+    <!-- 主要内容 -->
+    <div class="container container-responsive content-section">
+        <h2 class="section-title">角色介绍</h2>
+        
+        <div class="row row-responsive" id="charactersContainer">
+            <!-- 默认角色卡片 -->
+            <div class="col-md-6 col-responsive-6">
+                <div class="character-card card-responsive">
+                    <img src="../img/谢伶.jpg" class="character-img img-responsive" alt="谢怜">
+                    <div class="character-info card-body-responsive">
+                        <h3 class="character-name card-title-responsive">谢怜</h3>
+                        <p class="character-desc">
+                            仙乐国太子。一心想拯救苍生，却连自己的国家和父母都守护不了。白无相对谢怜的打击，差点让谢怜成为了第二个白无相。不过最终谢怜知道自己不是同一种人，他名字中的这个"怜"，也告诉了大家，无论经历多么残酷的事情，他还是那个怜悯苍生的殿下。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-responsive-6">
+                <div class="character-card card-responsive">
+                    <img src="../img/花城.jpg" class="character-img img-responsive" alt="花城">
+                    <div class="character-info card-body-responsive">
+                        <h3 class="character-name card-title-responsive">花城</h3>
+                        <p class="character-desc">
+                            从小受尽虐待，憎恶世界，一天想自杀，特地挑仙乐太子游街期间跳楼，意图拉一个垫背，爬上城墙后看见扮作悦神武者的谢怜后忘记自杀，不小心掉了下去，被谢怜接住，自此成为仙乐太子最忠诚的信徒。之后历经磨难，炼出血器，杀出重围，成为了绝境鬼王。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 人物经典语录区域 -->
+        <div class="quotes-section" style="margin-top: 80px;">
+            <h2 class="section-title">人物经典语录</h2>
+            <div id="quotesContainer" class="quotes-container">
+                <!-- 动态加载的语录内容 -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadCharacters() {
+            try {
+                const response = await fetch('/api/user/character');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.success && data.data && data.data.length > 0) {
+                        renderCharacters(data.data);
+                        return;
+                    }
+                }
+                
+                console.log('API数据无效，保持默认内容');
+            } catch (error) {
+                console.error('获取角色数据失败:', error);
+            }
+        }
+        
+        function renderCharacters(characters) {
+            const container = document.getElementById('charactersContainer');
+            if (!container || !characters || characters.length === 0) {
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            characters.forEach(character => {
+                const characterCard = document.createElement('div');
+                characterCard.className = 'col-md-6';
+                characterCard.innerHTML = `
+                    <div class="character-card">
+                        <img src="${character.image_url || '../img/default.jpg'}" class="character-img" alt="${character.name}">
+                        <div class="character-info">
+                            <h3 class="character-name">${character.name}</h3>
+                            <p class="character-desc">
+                                ${character.description || '暂无描述'}
+                            </p>
+                            ${character.personality ? `<p><strong>性格特点：</strong>${character.personality}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(characterCard);
+            });
+        }
+        
+        function updateNavbarLoginStatus() {
+            const user = localStorage.getItem('user_user');
+            const loginItem = document.getElementById('loginItem');
+            const registerItem = document.getElementById('registerItem');
+            const logoutItem = document.getElementById('logoutItem');
+            const userInfo = document.getElementById('userInfo');
+            const welcomeText = document.getElementById('welcomeText');
+            
+            if (user) {
+                try {
+                    const parsedUser = JSON.parse(user);
+                    if (loginItem) loginItem.style.display = 'none';
+                    if (registerItem) registerItem.style.display = 'none';
+                    if (logoutItem) logoutItem.style.display = 'block';
+                    if (userInfo) userInfo.style.display = 'block';
+                    if (welcomeText) welcomeText.textContent = `欢迎, ${parsedUser.username || '用户'}`;
+                } catch (e) {
+                    console.error('解析用户信息失败:', e);
+                }
+            } else {
+                if (loginItem) loginItem.style.display = 'block';
+                if (registerItem) registerItem.style.display = 'block';
+                if (logoutItem) logoutItem.style.display = 'none';
+                if (userInfo) userInfo.style.display = 'none';
+            }
+        }
+        
+        function checkLoginStatus() {
+            try {
+                const userData = localStorage.getItem('user_user');
+                const token = localStorage.getItem('user_token');
+                return userData && token;
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+                return false;
+            }
+        }
+        
+        function checkLoginForFeature(pageUrl, featureName) {
+            if (checkLoginStatus()) {
+                window.location.href = pageUrl;
+            } else {
+                alert(`请先登录以使用${featureName}功能`);
+                window.location.href = '/user-web/登录页面.html';
+            }
+        }
+        
+        function checkLoginForChat() {
+            if (checkLoginStatus()) {
+                window.location.href = '/user-web/聊天.html';
+            } else {
+                alert('请先登录以使用在线聊天功能');
+                window.location.href = '/user-web/登录页面.html';
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            updateNavbarLoginStatus();
+            alert('退出成功');
+        }
+        
+        // 加载人物语录
+        async function loadQuotes() {
+            try {
+                const response = await fetch('/api/user/quotes');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.success && data.data && data.data.length > 0) {
+                        renderQuotes(data.data);
+                        return;
+                    }
+                }
+                
+                // 使用默认数据
+                renderDefaultQuotes();
+            } catch (error) {
+                console.error('获取语录数据失败:', error);
+                renderDefaultQuotes();
+            }
+        }
+        
+        function renderQuotes(quotes) {
+            const container = document.getElementById('quotesContainer');
+            if (!container) return;
+            
+            container.innerHTML = quotes.map(quote => `
+                <div class="character-quotes">
+                    <div class="quotes-header">
+                        <img src="${quote.image_url || '../img/default.jpg'}" class="quotes-avatar" alt="${quote.character_name}">
+                        <h3 class="quotes-name">${quote.character_name}</h3>
+                    </div>
+                    <div class="quotes-content">${quote.content}</div>
+                </div>
+            `).join('');
+        }
+        
+        function renderDefaultQuotes() {
+            const defaultQuotes = [
+                {
+                    character_name: '🌟 谢怜',
+                    image_url: '../img/谢伶.jpg',
+                    content: `身在无间，心在桃源。
+是非在己，毁誉由人，得失不论。
+我虽身在无间，却心向桃源。但如果桃源本身就是无间呢？
+拯救苍生那种事，对我来说太遥远了。我只想保护好我想保护的人。
+人上有人，天外有天，风光的背后，不是沧桑，就是肮脏。`
+                },
+                {
+                    character_name: '🔥 花城',
+                    image_url: '../img/花城.jpg',
+                    content: `为你明灯三千，为你花开满城。
+我永远是你最忠诚的信徒。
+殿下，我没有骗你，我真的…… 等了你八百年。
+上元佳节，神武大街，惊鸿一瞒，百世沦陷。
+殿下，你这可真是…… 要了我的命了。
+天下无不散之筵席，但我永远不会离开你。`
+                },
+                {
+                    character_name: '📿 君吾（白无相）',
+                    image_url: '../img/君吾.png',
+                    content: `身在无间，心在无间。
+谢怜，你真是…… 让我恶心。
+我曾是神，也是人，最后，成了怪物。
+没有人能审判我，除了我自己。`
+                },
+                {
+                    character_name: '🦋 师青玄',
+                    image_url: '../img/师青玄.jpg',
+                    content: `风光无限是你，跌落尘埃也是你，重点是你，而不是怎样的你。
+交朋友，看的是心，不是身份。
+管他什么黑水白水文文黑黑，本风师大人看上的朋友，就是最好的朋友！`
+                },
+                {
+                    character_name: '💧 贺玄（黑水沉舟）',
+                    image_url: '../img/绿龙.jpg',
+                    content: `欠债还钱，天经地义。
+我这一生，所求不多，只要该有的，都还给我就好。
+有些债，必须亲自讨回来。`
+                },
+                {
+                    character_name: '🦊 风信',
+                    image_url: '../img/风信.jpg',
+                    content: `殿下，你善良是好事，但你的善良，有时候真的很伤人。
+这么多年了，你还是老样子，一点都没变。
+我虽然离开你了，但我从来没怀过你。`
+                },
+                {
+                    character_name: '🐶 慕情',
+                    image_url: '../img/慕情.jpg',
+                    content: `能力不够，就别硬撑。
+我慕情做事，问心无愧。
+有些人，有些事，不是想忘就能忘的。`
+                }
+            ];
+            
+            renderQuotes(defaultQuotes);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNavbarLoginStatus();
+            loadCharacters();
+            loadQuotes();
+            setupNavbarEvents();
+        });
+        
+        /**
+         * 处理导航栏展开/折叠事件
+         */
+        function setupNavbarEvents() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.getElementById('navbarNav');
+            
+            if (navbarToggler && navbarCollapse) {
+                navbarCollapse.addEventListener('show.bs.collapse', function() {
+                    // 导航栏展开时，添加navbar-expanded类到body
+                    document.body.classList.add('navbar-expanded');
+                    console.log('导航栏展开，启用滚动');
+                });
+                
+                navbarCollapse.addEventListener('hide.bs.collapse', function() {
+                    // 导航栏折叠时，移除navbar-expanded类
+                    document.body.classList.remove('navbar-expanded');
+                    console.log('导航栏折叠，恢复正常滚动');
+                });
+                
+                // 点击导航链接时自动折叠导航栏（移动端）
+                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth < 992) {
+                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
+                        }
+                    });
+                });
+            }
+        }
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js" onerror="resourceLoadError(this)"></script>
+    <script src="/js/responsive-navigation.js"></script>
+</body>
+</html>

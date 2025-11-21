@@ -1,0 +1,12 @@
+{
+  "name": "node-backend-config",
+  "version": "1.0.0",
+  "description": "后端配置模块",
+  "main": "db.js",
+  "scripts": {
+    "test": "echo \"此配置包不包含可执行脚本\""
+  },
+  "keywords": ["config", "backend"],
+  "author": "",
+  "license": "MIT"
+}

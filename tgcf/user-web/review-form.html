@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品评价 - 天官赐福</title>
+    
+    <!-- 内容安全策略 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:3003 https://longlong.baby https://dao.longlong.baby http://47.83.203.60;">
+    
+    <!-- 资源加载错误处理函数 -->
+    <script>
+        /**
+         * 资源加载错误处理函数
+         * @param {HTMLElement} element - 加载失败的元素
+         */
+        function handleResourceError(element) {
+            console.error(`资源加载失败: ${element.href || element.src}`);
+            // 尝试备用路径
+            if (element.tagName === 'LINK') {
+                const backupPath = element.href.includes('bootstrap.min.css') 
+                    ? '../css/bootstrap.min.css' 
+                    : '/icons-1.11.1/font/bootstrap-icons.min.css';
+                element.href = backupPath;
+                console.log(`尝试备用路径: ${backupPath}`);
+            }
+        }
+    </script>
+    
+    <!-- 引入Bootstrap CSS -->
+    <link rel="stylesheet" href="/bootstrap-5.3.2/dist/css/bootstrap.min.css" onerror="handleResourceError(this)">
+    <link rel="stylesheet" href="/icons-1.11.1/font/bootstrap-icons.min.css" onerror="handleResourceError(this)">
+    
+    <!-- Cloudflare Web Analytics -->
+    <script>
+        /**
+         * 加载Cloudflare统计脚本，添加错误处理
+         */
+        function loadCloudflareAnalytics() {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+            script.setAttribute('data-cf-beacon', '{"token": "9d08e7125dd044f5b53ec94bb4c29d14"}');
+            
+            // 添加错误处理
+            script.onerror = function() {
+                if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+                    console.warn('Cloudflare统计脚本加载失败，不影响网站功能');
+                }
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // 延迟加载统计脚本，避免阻塞页面渲染
+        window.addEventListener('load', function() {
+            setTimeout(loadCloudflareAnalytics, 1000);
+        });
+    </script>
+    <style>
+        body {
+            font-family: "微软雅黑", sans-serif;
+            background: linear-gradient(135deg, #f8f5f5 0%, #fff 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* 导航栏样式 - 与首页统一 */
+        .navbar-container {
+            background: linear-gradient(135deg, #9e2a2b 0%, #b83234 100%);
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(158, 42, 43, 0.3);
+            position: relative;
+        }
+        
+        .navbar-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #f9d71c, transparent);
+        }
+        
+        .navbar {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 80px;
+        }
+        
+        .logo {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+        
+        /* Bootstrap导航栏链接样式 */
+        .navbar-nav .nav-link {
+            color: #FFFFFF !important; /* 白色文字 */
+            font-size: 16px;
+            padding: 8px 15px;
+            position: relative; /* 用于下划线定位 */
+            transition: color 0.3s;
+        }
+        
+        /* 导航链接按钮样式 - 优化版 */
+        .navbar-nav .nav-link {
+            position: relative;
+            border-radius: 20px;
+            margin: 0 5px;
+            padding: 8px 20px !important;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background: rgba(249, 215, 28, 0.1);
+            border-color: rgba(249, 215, 28, 0.3);
+            color: #f9d71c !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249, 215, 28, 0.2);
+        }
+        
+        .navbar-nav .nav-link:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(249, 215, 28, 0.3);
+        }
+        
+        /* 金色下划线效果 */
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 15px;
+            right: 15px;
+            background: linear-gradient(90deg, #f9d71c, #ffeb3b);
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+        
+        .navbar-nav .nav-link:hover::after {
+            width: calc(100% - 30px);
+        }
+        
+        /* 导航栏切换按钮样式 - 优化版 */
+        .navbar-toggler {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-toggler:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.3rem rgba(249, 215, 28, 0.3);
+            outline: none;
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            width: 24px;
+            height: 24px;
+        }
+        
+        /* 解决导航栏展开时无法滚动的问题 */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                max-height: 70vh;
+                overflow-y: auto;
+                background-color: #9e2a2b;
+                padding: 15px;
+                border-radius: 0 0 8px 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            
+            .navbar-nav {
+                margin: 0;
+            }
+            
+            .nav-item {
+                margin: 5px 0;
+            }
+            
+            .nav-link {
+                padding: 10px 15px !important;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+            
+            .nav-link:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+        
+        /* 确保body在导航栏展开时可以滚动 */
+        body.navbar-expanded {
+            overflow: auto !important;
+            position: relative !important;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        .review-form-container {
+            background: linear-gradient(145deg, #fff8f0 0%, #faf5f0 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #deb887;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1);
+        }
+        
+        .star {
+            font-size: 24px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            user-select: none;
+        }
+        
+        .star:hover,
+        .star.active {
+            color: #f9d71c;
+        }
+        
+        .star.active {
+            text-shadow: 0 0 5px rgba(249, 215, 28, 0.5);
+        }
+        
+        .review-item {
+            background: #fff;
+            border: 1px solid #deb887;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .review-username {
+            font-weight: 600;
+            color: #9e2a2b;
+            font-size: 16px;
+        }
+        
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .review-stars {
+            color: #f9d71c;
+            font-size: 16px;
+        }
+        
+        .review-content {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .review-date {
+            color: #999;
+            font-size: 12px;
+            text-align: right;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 300px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .bg-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .bg-error {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+     <div class="navbar-container navbar-responsive">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid container-fluid-responsive">
+                <div class="logo">
+                    <a class="navbar-brand" href="/user-web/天官赐福首页.html">
+                        <img src="../img/cf.png" alt="天官赐福logo"/>
+                    </a>
+                </div>
+                <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切换导航">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item" id="loginItem">
+                            <a class="nav-link" href="/user-web/登录页面.html">登录</a>
+                        </li>
+                        <li class="nav-item" id="registerItem">
+                            <a class="nav-link" href="/user-web/注册.html">注册</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-web/天官赐福首页.html">网站详情</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#剧情简介">剧情简介</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/user-web/角色介绍.html">角色介绍</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#作品评价">作品评价</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="checkLoginForFeature('/user-web/留言板.html', '留言板'); return false;">留言板</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="checkLoginForChat(); return false;">在线聊天</a>
+                        </li>
+                        <li class="nav-item" id="logoutItem" style="display:none;">
+                            <a class="nav-link" href="#" onclick="logout(); return false;">  退出</a>
+                        </li>
+                        <li class="nav-item" id="userInfoItem" style="display:none;">
+                            <span class="nav-link text-warning" id="welcomeText">欢迎</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 style="color: #9e2a2b;">天官赐福 - 作品评价</h1>
+            <p class="text-muted">分享你对《天官赐福》的感受和想法</p>
+        </div>
+        
+        <!-- 已有评价列表 -->
+        <div class="mb-4">
+            <h3 style="color: #9e2a2b; margin-bottom: 20px;">读者评价</h3>
+            <div id="reviewsList" style="max-height: 600px; overflow-y: auto; border: 1px solid #deb887; border-radius: 10px; padding: 15px; background: #fafafa;">
+                <!-- 动态加载的评价列表 -->
+            </div>
+        </div>
+        
+        <!-- 评价提交表单 -->
+        <div class="review-form-container">
+            <h4 style="color: #9e2a2b; margin-bottom: 15px; text-align: center;">分享你的感受</h4>
+            <p style="text-align: center; color: #666; margin-bottom: 20px; font-size: 14px;">
+                从谢怜的"身在无间，心在桃源"到花城的"为你明灯三千"，《天官赐福》陪你走过了多少时光？快来评分 + 留下你的感受，无论是对角色的偏爱，还是对剧情的触动，都想听听你的故事～
+            </p>
+            
+            <form id="reviewForm" onsubmit="submitReview(event)">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight: 600; color: #9e2a2b;">昵称</label>
+                            <input type="text" class="form-control" id="reviewUsername" required maxlength="20" placeholder="请输入您的昵称" style="border: 1px solid #deb887; border-radius: 8px;">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight: 600; color: #9e2a2b;">评分</label>
+                            <div class="rating-stars" style="display: flex; gap: 5px; align-items: center;">
+                                <div class="stars-container" style="display: flex; gap: 2px;">
+                                    <span class="star" data-rating="1" onclick="setRating(1)">★</span>
+                                    <span class="star" data-rating="2" onclick="setRating(2)">★</span>
+                                    <span class="star" data-rating="3" onclick="setRating(3)">★</span>
+                                    <span class="star" data-rating="4" onclick="setRating(4)">★</span>
+                                    <span class="star" data-rating="5" onclick="setRating(5)">★</span>
+                                </div>
+                                <span id="ratingText" style="margin-left: 10px; color: #666; font-size: 14px;">请选择评分</span>
+                            </div>
+                            <input type="hidden" id="reviewRating" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; color: #9e2a2b;">评价内容</label>
+                    <textarea class="form-control" id="reviewContent" rows="4" required maxlength="500" placeholder="分享您对《天官赐福》的感受和想法..." style="border: 1px solid #deb887; border-radius: 8px; resize: vertical;"></textarea>
+                    <div class="text-end mt-1">
+                        <small class="text-muted">还可输入 <span id="charCount">500</span> 字</small>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #9e2a2b 0%, #b83234 100%); border: none; padding: 10px 30px; border-radius: 25px; font-weight: 600;">提交评价</button>
+                    <a href="/user-web/天官赐福首页.html" class="btn btn-secondary ms-2" style="padding: 10px 30px; border-radius: 25px;">返回首页</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src=" /js/responsive-navigation.js></script>
+    <script>
+        let currentRating = 0;
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+            loadUserReviews();
+            setupReviewForm();
+            setDefaultUsername();
+        });
+        
+        // 设置默认用户名
+        function setDefaultUsername() {
+            const user = localStorage.getItem('user_user');
+            const usernameInput = document.getElementById('reviewUsername');
+            
+            if (user && usernameInput) {
+                try {
+                    const userData = JSON.parse(user);
+                    if (userData.username) {
+                        usernameInput.value = userData.username;
+                    }
+                } catch (e) {
+                    console.log('无法获取用户信息');
+                }
+            }
+        }
+        
+        // 设置评分
+        function setRating(rating) {
+            currentRating = rating;
+            document.getElementById('reviewRating').value = rating;
+            
+            // 更新星星显示
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            
+            // 更新评分文本
+            const ratingTexts = ['', '很差', '一般', '不错', '很好', '非常棒'];
+            document.getElementById('ratingText').textContent = ratingTexts[rating] + ' (' + rating + '星)';
+        }
+        
+        // 设置评价表单
+        function setupReviewForm() {
+            const textarea = document.getElementById('reviewContent');
+            const charCount = document.getElementById('charCount');
+            
+            if (textarea && charCount) {
+                textarea.addEventListener('input', function() {
+                    const remaining = 500 - this.value.length;
+                    charCount.textContent = remaining;
+                    charCount.style.color = remaining < 50 ? '#e74c3c' : '#666';
+                });
+            }
+        }
+        
+        // 提交评价
+        async function submitReview(event) {
+            event.preventDefault();
+            
+            // 检查用户是否登录
+            const token = localStorage.getItem('user_token');
+            if (!token) {
+                showNotification('请先登录后再提交评价', 'error');
+                setTimeout(() => {
+                    window.location.href = '/user-web/登录页面.html';
+                }, 2000);
+                return;
+            }
+            
+            const username = document.getElementById('reviewUsername').value.trim();
+            const rating = document.getElementById('reviewRating').value;
+            const content = document.getElementById('reviewContent').value.trim();
+            
+            if (!username || !rating || !content) {
+                showNotification('请填写完整的评价信息', 'error');
+                return;
+            }
+            
+            if (rating < 1 || rating > 5) {
+                showNotification('请选择有效的评分', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/user/review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        rating: parseInt(rating),
+                        comment: content
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('评价提交成功，等待审核后显示', 'success');
+                    // 清空表单
+                    document.getElementById('reviewForm').reset();
+                    setRating(0);
+                    document.getElementById('ratingText').textContent = '请选择评分';
+                    document.getElementById('charCount').textContent = '500';
+                } else {
+                    showNotification(result.error || '提交失败，请重试', 'error');
+                }
+            } catch (error) {
+                console.error('提交评价失败:', error);
+                showNotification('网络错误，请稍后重试', 'error');
+            }
+        }
+        
+        // 加载用户评价
+        async function loadUserReviews() {
+            try {
+                const response = await fetch('/api/user/review?page=1&pageSize=10');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    renderUserReviews(result.data);
+                } else {
+                    console.log('暂无评价数据');
+                }
+            } catch (error) {
+                console.error('加载评价失败:', error);
+            }
+        }
+        
+        // 渲染用户评价
+        function renderUserReviews(reviews) {
+            const reviewsList = document.getElementById('reviewsList');
+            
+            if (!reviews || reviews.length === 0) {
+                reviewsList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无评价，快来成为第一个评价的读者吧！</p>';
+                return;
+            }
+            
+            reviewsList.innerHTML = reviews.map(review => {
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                const date = new Date(review.create_time).toLocaleDateString('zh-CN');
+                
+                return `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-username">${escapeHTML(review.username)}</span>
+                            <div class="review-rating">
+                                <span class="review-stars">${stars}</span>
+                                <span style="color: #666; font-size: 14px;">(${review.rating}/5)</span>
+                            </div>
+                        </div>
+                        <div class="review-content">${escapeHTML(review.content)}</div>
+                        <div class="review-date">${date}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 转义HTML特殊字符
+        function escapeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            // 移除已存在的通知
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => {
+                if (document.body.contains(notification)) {
+                    notification.remove();
+                }
+            });
+            
+            const notification = document.createElement('div');
+            notification.className = `notification bg-${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 3秒后自动消失
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }
+            }, 3003);
+        }
+
+        // 导航栏相关函数
+        function checkLoginStatus() {
+            const userInfo = localStorage.getItem('user_user');
+            const token = localStorage.getItem('user_token');
+            if (userInfo && token) {
+                const user = JSON.parse(userInfo);
+                document.getElementById('loginItem').style.display = 'none';
+                document.getElementById('registerItem').style.display = 'none';
+                document.getElementById('logoutItem').style.display = 'block';
+                document.getElementById('userInfoItem').style.display = 'block';
+                document.getElementById('welcomeText').textContent = `欢迎，${user.username}`;
+            }
+        }
+
+        // 检查登录状态并重定向到聊天页面
+        function checkLoginForChat() {
+            const userInfo = localStorage.getItem('user_user');
+            const token = localStorage.getItem('user_token');
+            
+            if (!userInfo || !token) {
+                alert('请先登录');
+                window.location.href = '/user-web/登录页面.html';
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(userInfo);
+                if (!user.username) {
+                    alert('用户信息不完整，请重新登录');
+                    localStorage.removeItem('user_user');
+                    localStorage.removeItem('user_token');
+                    window.location.href = '/user-web/登录页面.html';
+                    return;
+                }
+                
+                // 跳转到聊天页面
+                window.location.href = '/user-web/聊天.html';
+            } catch (error) {
+                console.error('解析用户信息失败:', error);
+                alert('用户信息错误，请重新登录');
+                localStorage.removeItem('user_user');
+                localStorage.removeItem('user_token');
+                window.location.href = '/user-web/登录页面.html';
+            }
+        }
+
+        // 检查登录状态并重定向到特定功能页面
+        function checkLoginForFeature(pageUrl, featureName) {
+            const userInfo = localStorage.getItem('user_user');
+            const token = localStorage.getItem('user_token');
+            
+            if (!userInfo || !token) {
+                alert(`请先登录以使用${featureName}`);
+                window.location.href = '/user-web/登录页面.html';
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(userInfo);
+                if (!user.username) {
+                    alert('用户信息不完整，请重新登录');
+                    localStorage.removeItem('user_user');
+                    localStorage.removeItem('user_token');
+                    window.location.href = '/user-web/登录页面.html';
+                    return;
+                }
+                
+                // 跳转到功能页面
+                window.location.href = pageUrl;
+            } catch (error) {
+                console.error('解析用户信息失败:', error);
+                alert('用户信息错误，请重新登录');
+                localStorage.removeItem('user_user');
+                localStorage.removeItem('user_token');
+                window.location.href = '/user-web/登录页面.html';
+            }
+        }
+
+        // 用户退出函数
+        function logout() {
+            localStorage.removeItem('user_user');
+            localStorage.removeItem('user_token');
+            alert('已成功退出');
+            window.location.href = '/user-web/登录页面.html';
+        }
+
+        // 页面加载时检查登录状态
+        window.addEventListener('load', checkLoginStatus);
+    </script>
+</body>
+</html>

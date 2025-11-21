@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试评价API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { margin: 5px; padding: 10px 15px; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>评价功能测试</h1>
+    
+    <div class="test-section">
+        <h3>1. 提交评价测试</h3>
+        <button onclick="testSubmitReview()">提交测试评价</button>
+        <div id="submitResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. 获取评价列表测试</h3>
+        <button onclick="testGetReviews()">获取评价列表</button>
+        <div id="getResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. 管理员获取所有评价测试</h3>
+        <button onclick="testAdminGetReviews()">管理员获取评价</button>
+        <div id="adminResult" class="result"></div>
+    </div>
+
+    <script>
+        async function testSubmitReview() {
+            const resultDiv = document.getElementById('submitResult');
+            resultDiv.innerHTML = '正在提交...';
+            
+            try {
+                const response = await fetch('http://localhost:3003/api/user/review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: '测试用户' + Date.now(),
+                        rating: 5,
+                        comment: '这是一个测试评价，《天官赐福》真的很棒！谢怜和花城的故事让人感动。'
+                    })
+                });
+                
+                const result = await response.json();
+                resultDiv.innerHTML = `<strong>提交结果:</strong><br><pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>错误:</strong> ${error.message}`;
+            }
+        }
+        
+        async function testGetReviews() {
+            const resultDiv = document.getElementById('getResult');
+            resultDiv.innerHTML = '正在获取...';
+            
+            try {
+                const response = await fetch('http://localhost:3003/api/user/review?page=1&pageSize=5');
+                const result = await response.json();
+                resultDiv.innerHTML = `<strong>获取结果:</strong><br><pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>错误:</strong> ${error.message}`;
+            }
+        }
+        
+        async function testAdminGetReviews() {
+            const resultDiv = document.getElementById('adminResult');
+            resultDiv.innerHTML = '正在获取...';
+            
+            try {
+                // 先登录管理员
+                const loginResponse = await fetch('http://localhost:3003/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                
+                const loginResult = await loginResponse.json();
+                
+                if (loginResult.success) {
+                    const token = loginResult.data.token;
+                    
+                    // 获取所有评价
+                    const response = await fetch('http://localhost:3003/api/admin/review', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    resultDiv.innerHTML = `<strong>管理员获取结果:</strong><br><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<strong>登录失败:</strong> ${loginResult.error}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>错误:</strong> ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

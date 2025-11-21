@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试图片上传</title>
+</head>
+<body>
+    <h1>测试图片上传功能</h1>
+    
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*" required>
+        <button type="submit">上传图片</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('请选择文件');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                // 先获取管理员token
+                const loginResponse = await fetch('http://localhost:3003/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                const loginResult = await loginResponse.json();
+                
+                if (!loginResult.success) {
+                    throw new Error('登录失败');
+                }
+                
+                const token = loginResult.data.token;
+                
+                // 上传文件
+                const uploadResponse = await fetch('http://localhost:3003/api/admin/upload-image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const result = await uploadResponse.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>上传结果：</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                    ${result.success ? `<img src="${result.data.url}" style="max-width: 300px;">` : ''}
+                `;
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>上传失败：</h3>
+                    <p style="color: red;">${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

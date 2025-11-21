@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "dev": "node reinit-database.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "mysql2": "^3.15.3",
+    "node-fetch": "^2.7.0"
+  }
+}

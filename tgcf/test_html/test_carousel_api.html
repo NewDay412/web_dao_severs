@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轮播图API测试</title>
+    <script>
+        /**
+         * 测试轮播图API调用
+         */
+        async function testCarouselAPI() {
+            try {
+                // 首先登录获取令牌
+                const loginResponse = await fetch('http://localhost:3003/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                
+                const loginData = await loginResponse.json();
+                console.log('登录响应:', loginData);
+                
+                if (!loginData.success) {
+                    throw new Error('登录失败: ' + (loginData.error || loginData.message));
+                }
+                
+                const token = loginData.data?.token || loginData.token;
+                if (!token) {
+                    throw new Error('未获取到令牌');
+                }
+                
+                // 测试轮播图API
+                const carouselResponse = await fetch('http://localhost:3003/api/admin/carousel', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                
+                console.log('轮播图API响应状态:', carouselResponse.status);
+                console.log('轮播图API响应头:', Object.fromEntries(carouselResponse.headers));
+                
+                const carouselData = await carouselResponse.json();
+                console.log('轮播图API响应数据:', carouselData);
+                
+                // 更新页面显示
+                document.getElementById('result').innerHTML = `
+                    <h3>测试结果</h3>
+                    <p>登录状态: 成功</p>
+                    <p>轮播图API状态: ${carouselResponse.status}</p>
+                    <p>轮播图API响应: ${JSON.stringify(carouselData, null, 2)}</p>
+                `;
+                
+            } catch (error) {
+                console.error('测试失败:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3>测试结果</h3>
+                    <p style="color: red;">测试失败: ${error.message}</p>
+                `;
+            }
+        }
+        
+        // 页面加载时自动测试
+        window.onload = testCarouselAPI;
+    </script>
+</head>
+<body>
+    <h1>轮播图API测试页面</h1>
+    <div id="result">正在测试...</div>
+    <button onclick="testCarouselAPI()">重新测试</button>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言板功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .message { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .messages-list { margin-top: 30px; }
+        .message-item { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 4px; }
+        .status { padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+        .status.pending { background: #6c757d; color: white; }
+        .status.published { background: #28a745; color: white; }
+        .status.replied { background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+    <h1>留言板功能测试</h1>
+    
+    <h2>提交留言</h2>
+    <form id="messageForm">
+        <div class="form-group">
+            <label for="username">用户名:</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">邮箱:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">手机号:</label>
+            <input type="tel" id="phone" pattern="^1[3-9]\d{9}$">
+        </div>
+        <div class="form-group">
+            <label for="content">留言内容:</label>
+            <textarea id="content" rows="4" required></textarea>
+        </div>
+        <button type="submit">提交留言</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <h2>留言列表</h2>
+    <button onclick="loadMessages()">刷新留言列表</button>
+    <div id="messagesList" class="messages-list"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:3003/api/user';
+        
+        // 提交留言
+        document.getElementById('messageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                content: document.getElementById('content').value.trim()
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('留言提交成功！', 'success');
+                    document.getElementById('messageForm').reset();
+                    loadMessages(); // 刷新留言列表
+                } else {
+                    showResult('提交失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showResult('提交失败: ' + error.message, 'error');
+            }
+        });
+        
+        // 加载留言列表
+        async function loadMessages() {
+            try {
+                const response = await fetch(`${API_BASE}/message`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayMessages(result.data);
+                } else {
+                    showResult('加载留言失败: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showResult('加载留言失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 显示留言列表
+        function displayMessages(messages) {
+            const container = document.getElementById('messagesList');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<p>暂无留言</p>';
+                return;
+            }
+            
+            container.innerHTML = messages.map(msg => {
+                const statusClass = msg.reply ? 'replied' : (msg.status === 'pending' ? 'pending' : 'published');
+                const statusText = msg.reply ? '已回复' : (msg.status === 'pending' ? '待审核' : '待回复');
+                
+                return `
+                    <div class="message-item">
+                        <div><strong>用户:</strong> ${escapeHtml(msg.username)}</div>
+                        <div><strong>邮箱:</strong> ${escapeHtml(msg.email || '-')}</div>
+                        <div><strong>手机:</strong> ${escapeHtml(msg.phone || '-')}</div>
+                        <div><strong>内容:</strong> ${escapeHtml(msg.content)}</div>
+                        <div><strong>状态:</strong> <span class="status ${statusClass}">${statusText}</span></div>
+                        <div><strong>时间:</strong> ${new Date(msg.create_time).toLocaleString()}</div>
+                        ${msg.reply ? `<div><strong>回复:</strong> ${escapeHtml(msg.reply)}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 显示结果消息
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                resultDiv.innerHTML = '';
+            }, 5000);
+        }
+        
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 页面加载时获取留言列表
+        window.addEventListener('load', loadMessages);
+    </script>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>响应式布局演示 - 天官赐福</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="icons-1.11.1/font/bootstrap-icons.min.css">
+    <link href="css/responsive-enhanced.css" rel="stylesheet">
+    <style>
+        .demo-section {
+            margin: 2rem 0;
+            padding: 2rem;
+            border: 2px dashed #9e2a2b;
+            border-radius: 10px;
+            background: rgba(249, 215, 28, 0.05);
+        }
+        
+        .demo-title {
+            color: #9e2a2b;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .breakpoint-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: #9e2a2b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 1000;
+        }
+        
+        .color-box {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+        
+        .color-box-1 { background: linear-gradient(135deg, #9e2a2b, #b83234); }
+        .color-box-2 { background: linear-gradient(135deg, #f9d71c, #ffeb3b); color: #333; }
+        .color-box-3 { background: linear-gradient(135deg, #28a745, #20c997); }
+        .color-box-4 { background: linear-gradient(135deg, #17a2b8, #138496); }
+        
+        .test-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 断点信息显示 -->
+    <div class="breakpoint-info" id="breakpointInfo">
+        当前断点: <span id="currentBreakpoint">-</span> | 
+        屏幕宽度: <span id="screenWidth">-</span>px
+    </div>
+
+    <!-- 导航栏演示 -->
+    <div class="navbar-container navbar-responsive">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid container-fluid-responsive">
+                <a class="navbar-brand navbar-brand-responsive" href="#">
+                    <i class="bi bi-star-fill"></i>
+                    天官赐福响应式演示
+                </a>
+                <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-responsive" href="#grid">网格系统</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-responsive" href="#components">组件演示</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-responsive" href="#utilities">工具类</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-responsive" href="#forms">表单</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container-responsive" style="margin-top: 2rem;">
+        <h1 class="text-center-responsive fs-4xl-responsive mb-responsive">
+            天官赐福响应式布局演示
+        </h1>
+        <p class="text-center-responsive fs-lg-responsive mb-responsive">
+            本页面展示了项目中使用的响应式布局系统和组件
+        </p>
+
+        <!-- 网格系统演示 -->
+        <section class="demo-section" id="grid">
+            <h2 class="demo-title fs-2xl-responsive">响应式网格系统</h2>
+            <div class="row-responsive">
+                <div class="col-responsive-12 col-responsive-6@md col-responsive-3@lg">
+                    <div class="color-box color-box-1">列 1</div>
+                </div>
+                <div class="col-responsive-12 col-responsive-6@md col-responsive-3@lg">
+                    <div class="color-box color-box-2">列 2</div>
+                </div>
+                <div class="col-responsive-12 col-responsive-6@md col-responsive-3@lg">
+                    <div class="color-box color-box-3">列 3</div>
+                </div>
+                <div class="col-responsive-12 col-responsive-6@md col-responsive-3@lg">
+                    <div class="color-box color-box-4">列 4</div>
+                </div>
+            </div>
+            <p class="fs-sm-responsive">
+                <strong>说明：</strong>在手机上显示为单列，平板上显示为两列，桌面上显示为四列。
+            </p>
+        </section>
+
+        <!-- 卡片组件演示 -->
+        <section class="demo-section" id="components">
+            <h2 class="demo-title fs-2xl-responsive">响应式卡片组件</h2>
+            <div class="row-responsive">
+                <div class="col-responsive-12 col-responsive-6@md col-responsive-4@lg">
+                    <div class="card-responsive">
+                        <div class="card-header-responsive">
+                            <h3 class="card-title-responsive">卡片标题 1</h3>
+                        </div>
+                        <div class="card-body-responsive">
+                            <p>这是一个响应式卡片组件的演示。卡片会根据屏幕大小自动调整布局和间距。</p>
+                            <button class="btn-responsive btn-primary-responsive">
+                                <i class="bi bi-heart"></i>
+                                主要按钮
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-responsive-12 col-responsive-6@md col-responsive-4@lg">
+                    <div class="card-responsive">
+                        <div class="card-header-responsive">
+                            <h3 class="card-title-responsive">卡片标题 2</h3>
+                        </div>
+                        <div class="card-body-responsive">
+                            <div class="test-image">
+                                <i class="bi bi-image" style="font-size: 2rem;"></i>
+                            </div>
+                            <p>包含图片的卡片演示。</p>
+                            <button class="btn-responsive btn-secondary-responsive btn-sm-responsive">
+                                次要按钮
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-responsive-12 col-responsive-12@md col-responsive-4@lg">
+                    <div class="card-responsive">
+                        <div class="card-header-responsive">
+                            <h3 class="card-title-responsive">卡片标题 3</h3>
+                        </div>
+                        <div class="card-body-responsive">
+                            <p>第三个卡片的内容。在不同屏幕尺寸下，卡片的排列方式会自动调整。</p>
+                            <button class="btn-responsive btn-primary-responsive btn-lg-responsive">
+                                大按钮
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 响应式表格演示 -->
+        <section class="demo-section">
+            <h2 class="demo-title fs-2xl-responsive">响应式表格</h2>
+            <div class="table-responsive-custom">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>角色名称</th>
+                            <th>身份</th>
+                            <th>特点</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>谢怜</td>
+                            <td>仙乐国太子</td>
+                            <td>善良、坚韧</td>
+                            <td><span class="badge bg-success">活跃</span></td>
+                            <td>
+                                <button class="btn-responsive btn-primary-responsive btn-sm-responsive">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>花城</td>
+                            <td>绝境鬼王</td>
+                            <td>忠诚、强大</td>
+                            <td><span class="badge bg-success">活跃</span></td>
+                            <td>
+                                <button class="btn-responsive btn-primary-responsive btn-sm-responsive">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>师青玄</td>
+                            <td>国师</td>
+                            <td>智慧、神秘</td>
+                            <td><span class="badge bg-warning">待定</span></td>
+                            <td>
+                                <button class="btn-responsive btn-secondary-responsive btn-sm-responsive">查看</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="fs-sm-responsive">
+                <strong>说明：</strong>表格在小屏幕上会自动添加水平滚动条，保持数据的完整显示。
+            </p>
+        </section>
+
+        <!-- 响应式工具类演示 -->
+        <section class="demo-section" id="utilities">
+            <h2 class="demo-title fs-2xl-responsive">响应式工具类</h2>
+            
+            <h3 class="fs-lg-responsive mb-responsive">显示/隐藏工具类</h3>
+            <div class="row-responsive mb-responsive">
+                <div class="col-responsive-6">
+                    <div class="p-responsive bg-light rounded-responsive">
+                        <p class="d-block-xs d-none-sm">只在手机上显示</p>
+                        <p class="d-none-xs d-block-sm d-none-md">只在平板上显示</p>
+                        <p class="d-none-md d-block-lg">只在桌面上显示</p>
+                    </div>
+                </div>
+                <div class="col-responsive-6">
+                    <div class="p-responsive bg-light rounded-responsive">
+                        <p class="mobile-show desktop-hide">移动端专用内容</p>
+                        <p class="mobile-hide desktop-show">桌面端专用内容</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="fs-lg-responsive mb-responsive">文本对齐</h3>
+            <div class="mb-responsive">
+                <p class="text-center-xs text-left-md p-responsive bg-light rounded-responsive">
+                    手机居中，桌面左对齐
+                </p>
+            </div>
+
+            <h3 class="fs-lg-responsive mb-responsive">间距工具类</h3>
+            <div class="row-responsive">
+                <div class="col-responsive-4">
+                    <div class="p-responsive bg-light rounded-responsive">
+                        标准内边距
+                    </div>
+                </div>
+                <div class="col-responsive-4">
+                    <div class="px-responsive py-responsive bg-light rounded-responsive">
+                        水平垂直内边距
+                    </div>
+                </div>
+                <div class="col-responsive-4">
+                    <div class="m-responsive bg-light rounded-responsive">
+                        标准外边距
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 响应式表单演示 -->
+        <section class="demo-section" id="forms">
+            <h2 class="demo-title fs-2xl-responsive">响应式表单</h2>
+            <form>
+                <div class="row-responsive">
+                    <div class="col-responsive-12 col-responsive-6@md">
+                        <div class="form-group-responsive">
+                            <label class="form-label-responsive">姓名</label>
+                            <input type="text" class="form-control-responsive" placeholder="请输入姓名">
+                        </div>
+                    </div>
+                    <div class="col-responsive-12 col-responsive-6@md">
+                        <div class="form-group-responsive">
+                            <label class="form-label-responsive">邮箱</label>
+                            <input type="email" class="form-control-responsive" placeholder="请输入邮箱">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group-responsive">
+                    <label class="form-label-responsive">留言内容</label>
+                    <textarea class="form-control-responsive" rows="4" placeholder="请输入留言内容"></textarea>
+                </div>
+                <div class="row-responsive">
+                    <div class="col-responsive-12 col-responsive-6@md">
+                        <button type="submit" class="btn-responsive btn-primary-responsive">
+                            <i class="bi bi-send"></i>
+                            提交表单
+                        </button>
+                    </div>
+                    <div class="col-responsive-12 col-responsive-6@md">
+                        <button type="reset" class="btn-responsive btn-secondary-responsive">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            重置表单
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- 通知演示 -->
+        <section class="demo-section">
+            <h2 class="demo-title fs-2xl-responsive">响应式通知系统</h2>
+            <p class="mb-responsive">点击下面的按钮测试不同类型的通知：</p>
+            <div class="row-responsive">
+                <div class="col-responsive-6 col-responsive-3@md">
+                    <button class="btn-responsive btn-primary-responsive" onclick="showNotification('这是一条成功消息！', 'success')">
+                        成功通知
+                    </button>
+                </div>
+                <div class="col-responsive-6 col-responsive-3@md">
+                    <button class="btn-responsive btn-secondary-responsive" onclick="showNotification('这是一条错误消息！', 'error')">
+                        错误通知
+                    </button>
+                </div>
+                <div class="col-responsive-6 col-responsive-3@md">
+                    <button class="btn-responsive btn-secondary-responsive" onclick="showNotification('这是一条警告消息！', 'warning')">
+                        警告通知
+                    </button>
+                </div>
+                <div class="col-responsive-6 col-responsive-3@md">
+                    <button class="btn-responsive btn-secondary-responsive" onclick="showNotification('这是一条信息消息！', 'info')">
+                        信息通知
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="mt-responsive p-responsive text-center-responsive" style="background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%); color: white;">
+        <p class="mb-0">天官赐福响应式布局演示 &copy; 2024</p>
+    </footer>
+
+    <script src="bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/responsive-navigation.js"></script>
+    <script>
+        // 更新断点信息
+        function updateBreakpointInfo() {
+            const width = window.innerWidth;
+            let breakpoint = 'xs';
+            
+            if (width >= 1400) breakpoint = 'xxl';
+            else if (width >= 1200) breakpoint = 'xl';
+            else if (width >= 992) breakpoint = 'lg';
+            else if (width >= 768) breakpoint = 'md';
+            else if (width >= 576) breakpoint = 'sm';
+            
+            document.getElementById('currentBreakpoint').textContent = breakpoint;
+            document.getElementById('screenWidth').textContent = width;
+        }
+
+        // 页面加载和窗口大小变化时更新信息
+        window.addEventListener('load', updateBreakpointInfo);
+        window.addEventListener('resize', updateBreakpointInfo);
+
+        // 演示模态框
+        function showModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-responsive show';
+            modal.innerHTML = `
+                <div class="modal-content-responsive">
+                    <div class="modal-header-responsive">
+                        <h5>响应式模态框</h5>
+                        <button onclick="closeModal(this)" style="background: none; border: none; font-size: 1.5rem;">&times;</button>
+                    </div>
+                    <div class="modal-body-responsive">
+                        <p>这是一个响应式模态框的演示。它会根据屏幕大小自动调整尺寸和位置。</p>
+                    </div>
+                    <div class="modal-footer-responsive">
+                        <button class="btn-responsive btn-secondary-responsive" onclick="closeModal(this)">关闭</button>
+                        <button class="btn-responsive btn-primary-responsive" onclick="closeModal(this)">确定</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeModal(btn) {
+            const modal = btn.closest('.modal-responsive');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(modal);
+            }, 300);
+        }
+    </script>
+</body>
+</html>

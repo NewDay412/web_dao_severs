@@ -1,0 +1,78 @@
+const express = require('express');
+const router = express.Router();
+const UserModel = require('../models/user.model');
+const { validateParams, successResponse, errorResponse, validationErrorResponse, asyncHandler } = require('../middleware/responseHandler');
+const jwt = require('jsonwebtoken');
+
+/**
+ * 用户注册接口
+ * @route POST /api/user/register
+ * @param {object} req.body - 包含username、password、email等信息
+ * @returns {object} 注册结果
+ */
+router.post('/register', asyncHandler(async (req, res) => {
+  const validation = validateParams(req.body, {
+    username: { required: true, type: 'string', minLength: 1, maxLength: 50 },
+    password: { required: true, type: 'string', minLength: 6 },
+    email: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }
+  });
+
+  if (!validation.valid) {
+    return validationErrorResponse(res, validation.errors);
+  }
+
+  const { username, password, email } = req.body;
+
+  try {
+    const user = await UserModel.register(username, password, email);
+    return successResponse(res, { user }, '注册成功');
+  } catch (error) {
+    console.error('注册失败:', error);
+    if (error.message === 'USERNAME_EXISTS') {
+      return errorResponse(res, '用户名已存在', 400);
+    }
+    return errorResponse(res, '注册失败，请稍后重试', 500);
+  }
+}));
+
+/**
+ * 用户登录接口
+ * @route POST /api/user/login
+ * @param {object} req.body - 包含username和password
+ * @returns {object} 包含token的响应
+ */
+router.post('/login', asyncHandler(async (req, res) => {
+  const validation = validateParams(req.body, {
+    username: { required: true, type: 'string', minLength: 1, maxLength: 50 },
+    password: { required: true, type: 'string', minLength: 1 }
+  });
+
+  if (!validation.valid) {
+    return validationErrorResponse(res, validation.errors);
+  }
+
+  const { username, password } = req.body;
+
+  try {
+    const user = await UserModel.login(username, password);
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      process.env.JWT_SECRET || 'your_jwt_secret_key',
+      { expiresIn: '7d' }
+    );
+
+    return successResponse(res, { token, user }, '登录成功');
+  } catch (error) {
+    console.error('登录失败:', error);
+    if (error.message === 'USER_NOT_FOUND') {
+      return errorResponse(res, '用户不存在', 404);
+    } else if (error.message === 'INVALID_PASSWORD') {
+      return errorResponse(res, '密码错误', 401);
+    }
+    return errorResponse(res, '登录失败，请稍后重试', 500);
+  }
+}));
+
+// 其他路由将在后续添加
+module.exports = router;

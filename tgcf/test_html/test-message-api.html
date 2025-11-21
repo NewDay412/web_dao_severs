@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试留言API</title>
+</head>
+<body>
+    <h1>测试留言提交</h1>
+    <button onclick="testSubmit()">测试提交留言</button>
+    <div id="result"></div>
+
+    <script>
+        async function testSubmit() {
+            const testData = {
+                username: "测试用户",
+                email: "test@example.com", 
+                phone: "13800138000",
+                content: "这是一条测试留言"
+            };
+
+            try {
+                const response = await fetch('http://localhost:3003/api/user/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                document.getElementById('result').innerHTML = 
+                    '<h3>响应结果:</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                console.log('API响应:', result);
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    '<h3>错误:</h3><pre>' + error.message + '</pre>';
+                console.error('请求失败:', error);
+            }
+        }
+    </script>
+</body>
+</html>

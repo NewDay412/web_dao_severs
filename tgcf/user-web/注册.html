@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:3003 https://longlong.baby https://dao.longlong.baby http://47.83.203.60;">
+    <title>注册页面 - 天官赐福</title>
+    <script>
+      /**
+       * 资源加载失败处理函数
+       * @param {HTMLElement} element - 加载失败的DOM元素
+       */
+      function handleResourceError(element) {
+        console.warn(`资源加载失败: ${element.href}`);
+        element.style.display = 'none';
+        
+        // 尝试备用路径
+        if (element && element.tagName === 'LINK') {
+          const href = element.getAttribute('href');
+          if (href && href.includes('bootstrap.min.css')) {
+    <link href=" /css/responsive-navbar.css rel=stylesheet>
+            element.href = '../css/bootstrap.min.css';
+    <link href=" /css/responsive-navbar.css rel=stylesheet>
+          } else if (href && href.includes('bootstrap-icons.min.css')) {
+            element.href = '/icons-1.11.1/font/bootstrap-icons.min.css';
+          }
+        }
+      }
+    </script>
+    <link href="../css/bootstrap.min.css" rel="stylesheet" onerror="handleResourceError(this)">
+    <link href=" /css/responsive-navbar.css rel=stylesheet>
+    <link rel="stylesheet" href="/icons-1.11.1/font/bootstrap-icons.min.css" onerror="handleResourceError(this)">
+    
+    <!-- Cloudflare Web Analytics -->
+    <script>
+        /**
+         * 加载Cloudflare统计脚本，添加错误处理
+         */
+        function loadCloudflareAnalytics() {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+            script.setAttribute('data-cf-beacon', '{"token": "9d08e7125dd044f5b53ec94bb4c29d14"}');
+            
+            // 添加错误处理
+            script.onerror = function() {
+                if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+                    console.warn('Cloudflare统计脚本加载失败，不影响网站功能');
+                }
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // 延迟加载统计脚本，避免阻塞页面渲染
+        window.addEventListener('load', function() {
+            setTimeout(loadCloudflareAnalytics, 1000);
+        });
+    </script>
+    <style>
+        /* 核心变量：简约高级色调体系 */
+        :root {
+            --primary: #5b7cff;
+            --primary-light: rgba(91, 124, 255, 0.1);
+            --success: #2dd4bf;
+            --error: #f87171;
+            --neutral-50: #fafafa;
+            --neutral-100: #f5f5f5;
+            --neutral-200: #e5e5e5;
+            --neutral-700: #404040;
+            --neutral-900: #171717;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --transition: all 0.25s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--neutral-50);
+            font-family: "Inter", "PingFang SC", "微软雅黑", sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--neutral-900);
+        }
+
+        /* 背景装饰：极简低饱和纹理 */
+        .bg-texture {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--primary) 0.3px, transparent 0.3px);
+            background-size: 50px 50px;
+            opacity: 0.04;
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 0 16px;
+        }
+
+        /* 标题区域：简约居中 */
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 600;
+            font-size: 26px;
+            letter-spacing: -0.3px;
+            color: var(--neutral-900);
+        }
+         /* 登录入口：底部引导，风格统一 */
+        .register-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--neutral-700);
+        }
+
+        .register-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .register-link a:hover {
+            color: #4a6eff;
+            text-decoration: underline;
+        }
+
+        /* 表单容器：高级卡片感 */
+        .register-form {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 48px 32px;
+            transition: var(--transition);
+        }
+
+        .register-form:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 表单组：优化间距和层次 */
+        .form-group {
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        /* 密码输入框包装器 */
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-input-wrapper .form-control {
+            padding-right: 50px;
+        }
+
+        /* 密码切换按钮 */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--neutral-400);
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 2;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .password-toggle i {
+            font-size: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--neutral-700);
+            transition: var(--transition);
+        }
+
+        .form-control {
+            width: 100%;
+            height: 52px;
+            padding: 0 20px;
+            border: 1px solid var(--neutral-200);
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--neutral-900);
+            background-color: var(--neutral-50);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            background-color: white;
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-control::placeholder {
+            color: var(--neutral-400);
+            opacity: 1;
+        }
+
+        /* 性别选择：极简交互样式 */
+        .gender-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .gender-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .gender-option input[type="radio"] {
+            display: none;
+        }
+
+        .gender-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 52px;
+            border: 1px solid var(--neutral-200);
+            border-radius: 8px;
+            font-size: 15px;
+            color: var(--neutral-700);
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: var(--neutral-50);
+        }
+
+        .gender-option input[type="radio"]:checked + label {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* 按钮区域：对比鲜明且简约 */
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            height: 52px;
+            border-radius: 8px;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #4a6eff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 124, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: var(--neutral-100);
+            color: var(--neutral-700);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--neutral-200);
+        }
+
+        /* 验证反馈：极简直观 */
+        .form-control.is-invalid {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .form-control.is-valid {
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
+        }
+        
+        .form-group {
+            position: relative;
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--error);
+            line-height: 1.4;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .success-icon {
+            position: absolute;
+            right: 50px;
+            top: 70%;
+            transform: translateY(-50%);
+            color: var(--success);
+            font-size: 18px;
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1;
+        }
+
+        .form-group:not(.password-input-wrapper) .success-icon {
+            right: 20px;
+        }
+
+        .success-icon.show {
+            opacity: 1;
+        }
+
+        /* 成功弹窗：高级悬浮感 */
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .success-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 40px 32px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .success-modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 56px;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--neutral-900);
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--neutral-700);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .modal-btn {
+            width: 100%;
+            height: 52px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-btn:hover {
+            background-color: #4a6eff;
+        }
+
+        /* 动画：简约不夸张 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-3px); }
+            40%, 80% { transform: translateX(3px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式：适配移动端 */
+        @media (max-width: 480px) {
+            .register-form {
+                padding: 36px 24px;
+            }
+
+            .page-title {
+                margin-bottom: 32px;
+                font-size: 24px;
+            }
+
+            .form-group {
+                margin-bottom: 24px;
+            }
+
+            .gender-group {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 28px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .form-control, .gender-option label, .btn, .modal-btn {
+                height: 48px;
+            }
+        }
+
+        /* 容错样式：处理资源加载失败 */
+        @keyframes handleResourceError {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-texture"></div>
+    <div class="container">
+        <h1 class="page-title">账号注册</h1>
+        <form class="register-form" id="registerForm" onsubmit="return validateForm()">
+            <!-- 用户名 -->
+            <div class="form-group">
+                <label class="form-label" for="username">
+                    <i class="bi bi-person me-2"></i>用户名
+                </label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="请输入3-16位中文/字母/数字/下划线" autocomplete="off">
+                <div class="error-message" id="usernameError">用户名需为3-16位中文、字母、数字或下划线</div>
+                <i class="bi bi-check-circle success-icon" id="usernameSuccess"></i>
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+                <label class="form-label" for="password">
+                    <i class="bi bi-lock me-2"></i>密码
+                </label>
+                <div class="password-input-wrapper">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="请输入6-20位密码" autocomplete="new-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                        <i class="bi bi-eye" id="password-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="passwordError">密码需为6-20位字符</div>
+                <i class="bi bi-check-circle success-icon" id="passwordSuccess"></i>
+            </div>
+
+            <!-- 确认密码 -->
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">
+                    <i class="bi bi-lock-fill me-2"></i>确认密码
+                </label>
+                <div class="password-input-wrapper">
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="请再次输入密码" autocomplete="new-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                        <i class="bi bi-eye" id="confirmPassword-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="confirmPasswordError">两次输入密码不一致</div>
+                <i class="bi bi-check-circle success-icon" id="confirmPasswordSuccess"></i>
+            </div>
+
+            <!-- 性别选择 -->
+            <div class="gender-group">
+                <div class="gender-option">
+                    <input type="radio" name="gender" id="male" value="male">
+                    <label for="male">男</label>
+                </div>
+                <div class="gender-option">
+                    <input type="radio" name="gender" id="female" value="female">
+                    <label for="female">女</label>
+                </div>
+                <div class="gender-option">
+                    <input type="radio" name="gender" id="other" value="other">
+                    <label for="other">其他</label>
+                </div>
+            </div>
+            <div class="error-message" id="genderError">请选择性别</div>
+
+            <!-- 按钮组 -->
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">注册</button>
+                <button type="reset" class="btn btn-secondary" onclick="resetFormState()">重置</button>
+            </div>
+            <div class="register-link">
+                已经有账号？<a href="/user-web/登录页面.html">立即登录</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-content">
+            <i class="bi bi-check-circle modal-icon"></i>
+            <h3 class="modal-title">注册成功！</h3>
+            <p class="modal-desc">您的账号已成功创建，3秒后自动跳转到登录页面</p>
+            <button class="modal-btn" onclick="closeModal()">立即跳转</button>
+        </div>
+    </div>
+
+    <script>
+        // 表单验证逻辑（完整功能保留）
+        function validateForm() {
+            let isValid = true;
+            
+            // 验证用户名
+            const username = document.getElementById('username').value.trim();
+            const usernameRegex = /^[\u4e00-\u9fa5a-zA-Z0-9_]{3,16}$/;
+            if (!usernameRegex.test(username)) {
+                showError('username');
+                isValid = false;
+            } else {
+                showSuccess('username');
+            }
+
+            // 验证密码
+            const password = document.getElementById('password').value;
+            if (password.length < 6 || password.length > 20) {
+                showError('password');
+                isValid = false;
+            } else {
+                showSuccess('password');
+            }
+
+            // 验证确认密码
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (confirmPassword !== password) {
+                showError('confirmPassword');
+                isValid = false;
+            } else if (confirmPassword.length > 0) {
+                showSuccess('confirmPassword');
+            }
+
+            // 验证性别
+            const genderChecked = document.querySelector('input[name="gender"]:checked');
+            if (!genderChecked) {
+                document.getElementById('genderError').classList.add('show');
+                isValid = false;
+            } else {
+                document.getElementById('genderError').classList.remove('show');
+            }
+
+            // 验证通过提交注册
+            if (isValid) {
+                submitRegistration();
+            }
+
+            return false; // 阻止表单默认提交
+        }
+
+        // 提交注册请求
+        async function submitRegistration() {
+            const formData = {
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('password').value,
+                sex: document.querySelector('input[name="gender"]:checked').value
+            };
+
+            try {
+                const response = await fetch('/api/user/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('successModal').classList.add('show');
+                    setTimeout(() => {
+                        window.location.href = '/user-web/登录页面.html';
+                    }, 3003);
+                } else {
+                    alert('注册失败：' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('注册请求失败:', error);
+                alert('注册失败，请检查网络连接');
+            }
+        }
+
+        // 显示错误状态
+        function showError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(`${fieldId}Error`);
+            const successIcon = document.getElementById(`${fieldId}Success`);
+            
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+            error.classList.add('show');
+            successIcon.classList.remove('show');
+        }
+
+        // 显示成功状态
+        function showSuccess(fieldId) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(`${fieldId}Error`);
+            const successIcon = document.getElementById(`${fieldId}Success`);
+            
+            field.classList.add('is-valid');
+            field.classList.remove('is-invalid');
+            error.classList.remove('show');
+            successIcon.classList.add('show');
+        }
+
+        // 重置表单状态
+        function resetFormState() {
+            const formControls = document.querySelectorAll('.form-control');
+            const errorMessages = document.querySelectorAll('.error-message');
+            const successIcons = document.querySelectorAll('.success-icon');
+            
+            formControls.forEach(control => {
+                control.classList.remove('is-valid', 'is-invalid');
+            });
+            
+            errorMessages.forEach(message => {
+                message.classList.remove('show');
+            });
+            
+            successIcons.forEach(icon => {
+                icon.classList.remove('show');
+            });
+
+            document.getElementById('genderError').classList.remove('show');
+        }
+
+        // 关闭弹窗并跳转
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('show');
+            window.location.href = '/user-web/登录页面.html'; // 替换为实际登录页地址
+        }
+
+        // 实时输入验证
+        document.getElementById('username').addEventListener('input', function() {
+            const usernameRegex = /^[\u4e00-\u9fa5a-zA-Z0-9_]{3,16}$/;
+            if (usernameRegex.test(this.value.trim())) {
+                showSuccess('username');
+            } else if (this.value.trim() !== '') {
+                showError('username');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+                document.getElementById('usernameError').classList.remove('show');
+                document.getElementById('usernameSuccess').classList.remove('show');
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value.length >= 6 && this.value.length <= 20) {
+                showSuccess('password');
+            } else if (this.value !== '') {
+                showError('password');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+                document.getElementById('passwordError').classList.remove('show');
+                document.getElementById('passwordSuccess').classList.remove('show');
+            }
+        });
+
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            if (this.value === password && this.value.length > 0) {
+                showSuccess('confirmPassword');
+            } else if (this.value !== '') {
+                showError('confirmPassword');
+            } else {
+               this.classList.remove('is-valid', 'is-invalid');
+                document.getElementById('confirmPasswordError').classList.remove('show');
+                document.getElementById('confirmPasswordSuccess').classList.remove('show');
+            }
+        });
+
+        // 性别选择时移除错误提示
+        document.querySelectorAll('input[name="gender"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('genderError').classList.remove('show');
+            });
+        });
+
+        // 密码可见性切换
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const eyeIcon = document.getElementById(inputId + '-eye');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeIcon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                eyeIcon.className = 'bi bi-eye';
+            }
+        }
+
+
+    </script>
+</body>
+</html>

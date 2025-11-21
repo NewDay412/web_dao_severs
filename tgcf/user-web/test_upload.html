@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试上传页面</title>
+    
+    <!-- 内容安全策略 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:3003 https://longlong.baby https://dao.longlong.baby http://47.83.203.60;">
+    
+    <!-- 资源加载错误处理函数 -->
+    <script>
+        /**
+         * 资源加载错误处理函数
+         * @param {HTMLElement} element - 加载失败的元素
+         */
+        function handleResourceError(element) {
+            console.error(`资源加载失败: ${element.href || element.src}`);
+            // 尝试备用路径
+            if (element.tagName === 'LINK') {
+                const backupPath = element.href.includes('bootstrap.min.css') 
+                    ? '../css/bootstrap.min.css' 
+                    : '/icons-1.11.1/font/bootstrap-icons.min.css';
+                element.href = backupPath;
+                console.log(`尝试备用路径: ${backupPath}`);
+            }
+        }
+    </script>
+    
+    <!-- 引入Bootstrap CSS -->
+    <link rel="stylesheet" href="/bootstrap-5.3.2/dist/css/bootstrap.min.css" onerror="handleResourceError(this)">
+    <link rel="stylesheet" href="/icons-1.11.1/font/bootstrap-icons.min.css" onerror="handleResourceError(this)">
+    
+    <!-- Cloudflare Web Analytics -->
+    <script>
+        /**
+         * 加载Cloudflare统计脚本，添加错误处理
+         */
+        function loadCloudflareAnalytics() {
+            const script = document.createElement('script');
+            script.defer = true;
+            script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+            script.setAttribute('data-cf-beacon', '{"token": "9d08e7125dd044f5b53ec94bb4c29d14"}');
+            
+            // 添加错误处理
+            script.onerror = function() {
+                if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+                    console.warn('Cloudflare统计脚本加载失败，不影响网站功能');
+                }
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // 延迟加载统计脚本，避免阻塞页面渲染
+        window.addEventListener('load', function() {
+            setTimeout(loadCloudflareAnalytics, 1000);
+        });
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        input[type="file"] { margin: 10px 0; }
+        button { padding: 8px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>测试轮播图图片上传</h1>
+    <input type="file" id="imageFile" accept="image/*">
+    <button onclick="testUpload()">上传图片</button>
+    <div id="result"></div>
+
+    <script>
+        async function testUpload() {
+            const fileInput = document.getElementById('imageFile');
+            const resultDiv = document.getElementById('result');
+            
+            if (!fileInput.files.length) {
+                resultDiv.innerHTML = '<p style="color: red;">请选择一张图片</p>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                resultDiv.innerHTML = '<p>上传中...</p>';
+                
+                // 使用管理员身份上传，需要提供token
+                const response = await fetch('/api/admin/upload-image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NDQ4ODk1NzcsImV4cCI6MTc0NDk3NTk3N30.4Hd8lB5d1yZ5w3Z1Z9l8w8w8w8w8w8w8w8w8w8w8w8w8w8'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <p style="color: green;">上传成功！</p>
+                        <p>图片URL: ${data.data.url}</p>
+                        <p>文件名: ${data.data.filename}</p>
+                        <img src="${data.data.url}" width="200" alt="上传的图片">
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">上传失败: ${data.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">错误: ${error.message}</p>`;
+                console.error('上传错误:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+/* 导航栏响应式样式修复 */
+:root {
+    --primary-red: #9e2a2b;
+    --primary-gold: #f9d71c;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --border-light: rgba(255, 255, 255, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 导航栏容器 */
+.navbar-container {
+    background: linear-gradient(135deg, var(--primary-red) 0%, #b83234 100%);
+    padding: 0 20px;
+    box-shadow: 0 4px 20px rgba(158, 42, 43, 0.3);
+    position: relative;
+}
+
+.navbar-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+}
+
+.navbar {
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 80px;
+}
+
+/* 导航链接样式 */
+.navbar-nav .nav-link {
+    color: #FFFFFF !important;
+    font-size: 16px;
+    padding: 8px 20px !important;
+    position: relative;
+    border-radius: 20px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.navbar-nav .nav-link:hover {
+    background: rgba(249, 215, 28, 0.1);
+    border-color: rgba(249, 215, 28, 0.3);
+    color: var(--primary-gold) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(249, 215, 28, 0.2);
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 15px;
+    right: 15px;
+    background: linear-gradient(90deg, var(--primary-gold), #ffeb3b);
+    transition: width 0.3s ease;
+    border-radius: 1px;
+}
+
+.navbar-nav .nav-link:hover::after {
+    width: calc(100% - 30px);
+}
+
+/* 响应式布局修复 */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        max-height: 70vh;
+        overflow-y: auto;
+        background-color: var(--primary-red);
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .nav-item {
+        margin: 5px 0;
+    }
+    
+    .nav-link {
+        padding: 10px 15px !important;
+        border-radius: 4px;
+        text-align: center;
+    }
+    
+    .navbar-toggler {
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* 确保导航栏在移动设备上正常显示 */
+.navbar-responsive {
+    position: relative;
+    z-index: 1030;
+}
+
+/* 修复导航栏展开时的滚动问题 */
+body.navbar-expanded {
+    overflow: auto !important;
+    position: relative !important;
+}

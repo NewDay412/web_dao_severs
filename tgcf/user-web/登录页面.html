@@ -5,52 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' http://localhost:3003 https://longlong.baby https://dao.longlong.baby http://47.83.203.60;"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
     />
     <title>登录页面 - 天官赐福</title>
-    <script>
-
-    </script>
     <link
       href="../css/bootstrap.min.css"
-    <script src=" /js/responsive-navigation.js></script>
       rel="stylesheet"
       onerror="handleResourceError(this)"
     />
     <link
       rel="stylesheet"
-      href="/icons-1.11.1/font/bootstrap-icons.min.css"
+      href="../icons-1.11.1/font/bootstrap-icons.min.css"
       onerror="handleResourceError(this)"
     />
-    <link href="../css/responsive-enhanced.css" rel="stylesheet" onerror="handleResourceError(this)" />
-    <link href=" /css/responsive-navbar.css rel=stylesheet>
-    
-    <!-- Cloudflare Web Analytics -->
-    <script>
-        /**
-         * 加载Cloudflare统计脚本，添加错误处理
-         */
-        function loadCloudflareAnalytics() {
-            const script = document.createElement('script');
-            script.defer = true;
-            script.src = 'https://static.cloudflareinsights.com/beacon.min.js';
-            script.setAttribute('data-cf-beacon', '{"token": "9d08e7125dd044f5b53ec94bb4c29d14"}');
-            
-            // 添加错误处理
-            script.onerror = function() {
-                if (typeof console !== 'undefined' && typeof console.warn === 'function') {
-                    console.warn('Cloudflare统计脚本加载失败，不影响网站功能');
-                }
-            };
-            
-            document.head.appendChild(script);
-        }
-        
-        // 延迟加载统计脚本，避免阻塞页面渲染
-        window.addEventListener('load', function() {
-            setTimeout(loadCloudflareAnalytics, 1000);
-        });
-    </script>
+    <link href="../css/responsive-enhanced.css" rel="stylesheet" />
     <style>
       /* 核心变量：与注册页保持一致，确保风格统一 */
       :root {
@@ -463,7 +431,15 @@
         }
       }
 
-
+      /* 容错样式：与注册页一致 */
+      @keyframes handleResourceError {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
     </style>
   </head>
   <body>
@@ -474,8 +450,6 @@
       </h1>
       <form
         class="login-form card-responsive"
-        action="/api/login"
-        method="post"
         id="loginForm"
         onsubmit="return validateLoginForm()"
       >
@@ -613,18 +587,29 @@
       // 提交登录请求
       async function submitLogin(username, password) {
         try {
-          // 使用相对路径的登录接口
+          // 使用统一的登录接口
           const response = await fetch("/api/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: 'include',
             body: JSON.stringify({ username, password }),
           });
 
+          // 检查响应是否为JSON
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            console.error('响应不是JSON:', contentType);
+            const text = await response.text();
+            console.error('响应体:', text.substring(0, 200));
+            showErrorModal('接口错误', '后端接口返回了错误页面，请检查服务器配置');
+            return;
+          }
+
           const result = await response.json();
           
-          if (result.status === 'success') {
+          if (result.success) {
             // 检查用户角色
             const isAdmin = result.user?.role === 'admin';
             
@@ -665,13 +650,13 @@
             // 显示成功弹窗并跳转
             document.getElementById("successModal").classList.add("show");
             setTimeout(() => {
-              // 使用相对路径跳转
+              // 使用完整URL路径跳转
               if (isAdmin) {
                 window.location.href = "/admin-web/admin.html";
               } else {
                 window.location.href = "/user-web/天官赐福首页.html";
               }
-            }, 3003);
+            }, 3000);
           } else {
             // 登录失败：根据状态码显示不同错误信息
             if (response.status === 404) {
@@ -687,7 +672,11 @@
           }
         } catch (error) {
           console.error("登录请求失败:", error);
-          showErrorModal("网络错误", "登录失败，请检查网络连接");
+          if (error instanceof SyntaxError) {
+            showErrorModal("JSON解析错误", "服务器返回了无效的JSON，请检查后端配置");
+          } else {
+            showErrorModal("网络错误", "登录失败，请检查网络连接");
+          }
         }
       }
 
@@ -727,26 +716,10 @@
         }
       }
 
-      /**
-       * 资源加载失败处理函数
-       * @param {HTMLElement} element - 加载失败的DOM元素
-       */
+      // 资源加载失败处理
       function handleResourceError(element) {
         console.warn(`资源加载失败: ${element.href}`);
         element.style.display = "none";
-        
-        // 尝试备用路径
-        
-         if (element && element.tagName === 'LINK') {
-          const href = element.getAttribute('href');
-          if (href && href.includes('bootstrap.min.css')) {
-            element.href = '/css/bootstrap.min.css';
-          } else if (href && href.includes('bootstrap-icons.min.css')) {
-            element.href = '/icons-1.11.1/font/bootstrap-icons.min.css';
-          } else if (href && href.includes('responsive-enhanced.css')) {
-            element.href = '/css/responsive-enhanced.css';
-          }
-        }
       }
     </script>
   </body>

@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const jwt = require('jsonwebtoken');
 
 // 导入路由
 const userRoutes = require('./api/user.routes');
@@ -13,6 +14,12 @@ const adminChatRoutes = require('./api/adminChat.routes');
 
 // 导入数据库配置
 const db = require('./config/db');
+
+// 导入模型
+const { UserModel, AdminModel } = require('./models/user.model');
+
+// JWT密钥
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 // 创建Express应用实例
 const app = express();
@@ -28,7 +35,9 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:"],
+      imgSrc: ["'self'", "data:", "*.baidu.com"],
+      fontSrc: ["'self'", "data:", "fonts.gstatic.com"],
+      connectSrc: ["'self'", "rumt-zh.com"],
     },
   },
 })); // 安全头部设置
@@ -39,167 +48,164 @@ app.use(helmet({
  */
 const corsOptions = {
   origin: function (origin, callback) {
-    // 允许没有origin的请求（如file://协议）
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost',
-      'http://localhost:80',
-      'http://localhost:3003',
-      'http://localhost:5173',
-      'http://localhost:8080',
-      'http://localhost:8000',
-      'http://dao.longlong.baby',
-      'https://dao.longlong.baby',
-      'http://longlong.baby',
-      'https://longlong.baby',
-      'http://47.83.203.60',
-      'http://47.83.203.60:3003'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('file://')) {
-      callback(null, true);
-    } else {
-      callback(null, true); // 开发环境允许所有来源
-    }
+    // 允许所有来源访问（开发环境下）
+    callback(null, true);
   },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
-  maxAge: 3600
 };
+
 app.use(cors(corsOptions));
 
-/**
- * 请求日志
- * 使用morgan记录HTTP请求
- */
-app.use(morgan('combined'));
+// 请求体解析中间件
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-/**
- * 数据解析中间件
- */
-app.use(express.json({ limit: '10mb' })); // JSON解析，设置大小限制
-app.use(express.urlencoded({ extended: true, limit: '10mb' })); // URL编码解析
+// 日志中间件
+app.use(morgan('dev'));
 
-/**
- * 静态文件服务
- */
-app.use(express.static(path.join(__dirname, '..')));
-app.use('/user-web', express.static(path.join(__dirname, '../user-web')));
-app.use('/admin-web', express.static(path.join(__dirname, '../admin-web')));
-app.use('/img', express.static(path.join(__dirname, '../img')));
-app.use('/css', express.static(path.join(__dirname, '../css')));
-app.use('/js', express.static(path.join(__dirname, '../js')));
-// 图片上传目录 - 支持管理后台上传的图片访问
+// 静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/node-backend/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /**
  * 健康检查接口
  */
 app.get('/health', (req, res) => {
-  res.status(200).json({
+  res.json({
     status: 'ok',
-    message: '后端服务运行正常',
-    timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    version: '1.0.0'
+    timestamp: new Date().toISOString(),
+    message: '服务运行正常',
   });
 });
 
 /**
- * 根路径
- */
-app.get('/', (req, res) => {
-  res.redirect('/user-web/天官赐福首页.html');
-});
-
-/**
- * 统一登录接口
+ * 登录接口
+ * 支持管理员和普通用户登录
  */
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+    const errorId = Date.now();
+
     if (!username || !password) {
       return res.status(400).json({
-        status: 'error',
-        message: '用户名和密码不能为空'
+        success: false,
+        error: '用户名和密码不能为空',
+        errorId
       });
     }
-    
-    // 默认管理员账号
+
+    // 先尝试管理员登录
+    try {
+      let user = await AdminModel.login(username, password);
+      if (user) {
+        const token = jwt.sign(
+          { username: user.username, role: user.role },
+          JWT_SECRET,
+          { expiresIn: '2h' }
+        );
+
+        return res.json({
+          success: true,
+          token,
+          user: { username: user.username, role: user.role },
+          message: '管理员登录成功'
+        });
+      }
+    } catch (err) {
+      console.error(`[${errorId}] 管理员登录失败:`, err);
+      // 不立即返回错误，继续尝试普通用户登录
+    }
+
+    // 再尝试普通用户登录
+    try {
+      let user = await UserModel.login(username, password);
+      if (user) {
+        const token = jwt.sign(
+          { username: user.username, role: 'user' },
+          JWT_SECRET,
+          { expiresIn: '2h' }
+        );
+
+        return res.json({
+          success: true,
+          token,
+          user: { username: user.username, role: 'user' },
+          message: '用户登录成功'
+        });
+      }
+    } catch (err) {
+      console.error(`[${errorId}] 用户登录失败:`, err);
+      // 不立即返回错误，继续尝试默认账号
+    }
+
+    // 默认管理员账号（保留兼容性）
     if (username === 'admin' && password === 'admin123') {
-      const jwt = require('jsonwebtoken');
-      const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
-      
       const token = jwt.sign(
         { username: 'admin', role: 'admin' },
         JWT_SECRET,
         { expiresIn: '2h' }
       );
-      
+
       return res.json({
-        status: 'success',
+        success: true,
         token,
         user: { username: 'admin', role: 'admin' },
         message: '管理员登录成功'
       });
     }
-    
-    // 默认用户账号
+
+    // 默认用户账号（保留兼容性）
     if (username === 'user1' && password === 'password123') {
-      const jwt = require('jsonwebtoken');
-      const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
-      
       const token = jwt.sign(
         { username: 'user1', role: 'user' },
         JWT_SECRET,
         { expiresIn: '2h' }
       );
-      
+
       return res.json({
-        status: 'success',
+        success: true,
         token,
         user: { username: 'user1', role: 'user' },
         message: '用户登录成功'
       });
     }
-    
+
+    // 登录失败
     return res.status(401).json({
-      status: 'error',
-      message: '用户名或密码错误'
+      success: false,
+      error: '用户名或密码错误',
+      errorId
     });
-    
   } catch (error) {
-    console.error('登录失败:', error);
-    return res.status(500).json({
-      status: 'error',
-      message: '登录失败，请稍后重试'
+    // 记录错误日志
+    const errorId = Date.now();
+    console.error(`[${errorId}] 登录接口异常:`, error);
+    // 返回友好的错误响应
+    res.status(500).json({
+      success: false,
+      error: '服务器内部错误，请稍后重试',
+      errorId
     });
   }
 });
 
-/**
- * 路由配置
- */
-app.use('/api/user', userRoutes); // 用户接口
-app.use('/api/admin', adminRoutes); // 管理员接口
-app.use('/api/chat', chatRoutes); // 聊天接口（保留兼容性）
-app.use('/api/user-chat', userChatRoutes); // 用户聊天接口
-app.use('/api/admin-chat', adminChatRoutes); // 管理员聊天接口
-
-
+// 注册路由
+app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/user/chat', userChatRoutes);
+app.use('/api/admin/chat', adminChatRoutes);
 
 /**
  * 404处理中间件
  */
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     error: '接口不存在',
-    path: req.path,
-    method: req.method
+    errorId: new Date().getTime()
   });
 });
 
@@ -207,25 +213,15 @@ app.use((req, res, next) => {
  * 全局错误处理中间件
  */
 app.use((err, req, res, next) => {
-  // 记录详细错误信息
-  console.error('服务器错误:', {
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-    timestamp: new Date().toISOString()
-  });
-  
-  // 防止头部已发送错误
-  if (res.headersSent) {
-    return next(err);
-  }
-  
+  // 记录错误日志
+  const errorId = new Date().getTime();
+  console.error(`[${errorId}] 全局错误:`, err);
+
   // 返回友好的错误响应
   res.status(500).json({
     success: false,
     error: '服务器内部错误，请稍后重试',
-    errorId: new Date().getTime()
+    errorId
   });
 });
 

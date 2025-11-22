@@ -3,6 +3,9 @@ const cors = require('cors');
 const path = require('path');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // 导入路由
 const userRoutes = require('./api/user.routes');
@@ -17,168 +20,185 @@ const db = require('./config/db');
 // 创建Express应用实例
 const app = express();
 const PORT = process.env.PORT || 3003;
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key'; // 统一JWT密钥
 
-/**
- * 安全中间件配置
- */
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:"],
-    },
-  },
-})); // 安全头部设置
-
-/**
- * 跨域配置
- * 支持前端开发常用端口
- */
-const corsOptions = {
-  origin: function (origin, callback) {
-    // 允许没有origin的请求（如file://协议）
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost',
-      'http://localhost:80',
-      'http://localhost:3003',
-      'http://localhost:5173',
-      'http://localhost:8080',
-      'http://localhost:8000',
-      'http://dao.longlong.baby',
-      'https://dao.longlong.baby',
-      'http://longlong.baby',
-      'https://longlong.baby',
-      'http://47.83.203.60',
-      'http://47.83.203.60:3003'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('file://')) {
-      callback(null, true);
-    } else {
-      callback(null, true); // 开发环境允许所有来源
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
-  maxAge: 3600
+// 数据库基础配置（抽离到外部，避免重复定义）
+const dbConfig = {
+  host: 'localhost',
+  user: 'root',
+  password: 'Mysql'
 };
-app.use(cors(corsOptions));
-
-/**
- * 请求日志
- * 使用morgan记录HTTP请求
- */
-app.use(morgan('combined'));
-
-/**
- * 数据解析中间件
- */
-app.use(express.json({ limit: '10mb' })); // JSON解析，设置大小限制
-app.use(express.urlencoded({ extended: true, limit: '10mb' })); // URL编码解析
-
-/**
- * 静态文件服务
- */
-app.use(express.static(path.join(__dirname, '..')));
-app.use('/user-web', express.static(path.join(__dirname, '../user-web')));
-app.use('/admin-web', express.static(path.join(__dirname, '../admin-web')));
-app.use('/img', express.static(path.join(__dirname, '../img')));
-app.use('/css', express.static(path.join(__dirname, '../css')));
-app.use('/js', express.static(path.join(__dirname, '../js')));
-// 图片上传目录 - 支持管理后台上传的图片访问
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/node-backend/uploads', express.static(path.join(__dirname, 'uploads')));
-
-/**
- * 健康检查接口
- */
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: '后端服务运行正常',
-    timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    version: '1.0.0'
-  });
-});
-
-/**
- * 根路径
- */
-app.get('/', (req, res) => {
-  res.redirect('/user-web/天官赐福首页.html');
-});
 
 /**
  * 统一登录接口
+ * 逻辑优先级：1. 管理员数据库验证 → 2. 用户数据库验证 → 3. 硬编码账号兜底
  */
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     
+    // 1. 校验请求参数
     if (!username || !password) {
       return res.status(400).json({
         status: 'error',
         message: '用户名和密码不能为空'
       });
     }
+
+    let userInfo = null;
+    let isAdmin = false;
     
-    // 默认管理员账号
-    if (username === 'admin' && password === 'admin123') {
-      const jwt = require('jsonwebtoken');
-      const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
+    // 2. 尝试从管理员数据库验证（web_admindao → admins表）
+    try {
+      const adminConnection = await mysql.createConnection({
+        ...dbConfig,
+        database: 'web_admindao'
+      });
       
+      console.log('尝试管理员登录，用户名:', username);
+      
+      // 查询管理员信息（LIMIT 1 避免多条数据）
+      const [adminRows] = await adminConnection.execute(
+        'SELECT id, username, password, role FROM admins WHERE username = ? LIMIT 1',
+        [username.trim()] // 去除用户名首尾空格，避免查询失败
+      );
+      
+      await adminConnection.end(); // 关闭连接
+      
+      // 验证管理员密码
+      if (adminRows.length > 0) {
+        const admin = adminRows[0];
+        console.log('找到管理员账号，进行密码验证...');
+        
+        let passwordMatch;
+        try {
+          // 优先使用bcrypt验证（数据库密码应为加密格式）
+          passwordMatch = await bcrypt.compare(password, admin.password);
+        } catch (e) {
+          // bcrypt验证失败时，降级为明文比较（兼容旧数据）
+          passwordMatch = (password === admin.password);
+          console.log('bcrypt验证失败，使用明文密码比较');
+        }
+        
+        if (passwordMatch) {
+          isAdmin = true;
+          userInfo = {
+            id: admin.id,
+            username: admin.username,
+            role: admin.role || 'admin'
+          };
+        }
+      }
+    } catch (adminError) {
+      console.warn('管理员数据库验证失败，继续尝试用户数据库:', adminError.message);
+    }
+    
+    // 3. 管理员验证失败，尝试从用户数据库验证（web_userdao → users表）
+    if (!userInfo) {
+      try {
+        const userConnection = await mysql.createConnection({
+          ...dbConfig,
+          database: 'web_userdao'
+        });
+        
+        console.log('尝试用户登录，用户名:', username);
+        
+        // 查询用户信息
+        const [userRows] = await userConnection.execute(
+          'SELECT id, username, password FROM users WHERE username = ? LIMIT 1',
+          [username.trim()]
+        );
+        
+        await userConnection.end(); // 关闭连接
+        
+        // 验证用户密码
+        if (userRows.length > 0) {
+          const user = userRows[0];
+          console.log('找到用户账号，进行密码验证...');
+          
+          let passwordMatch;
+          try {
+            passwordMatch = await bcrypt.compare(password, user.password);
+          } catch (e) {
+            passwordMatch = (password === user.password);
+            console.log('bcrypt验证失败，使用明文密码比较');
+          }
+          
+          if (passwordMatch) {
+            userInfo = {
+              id: user.id,
+              username: user.username,
+              role: 'user'
+            };
+          }
+        }
+      } catch (userError) {
+        console.warn('用户数据库验证失败:', userError.message);
+      }
+    }
+    
+    // 4. 数据库验证失败，使用硬编码账号兜底（兼容测试场景）
+    if (!userInfo) {
+      console.log('数据库验证失败，尝试硬编码账号验证');
+      
+      // 硬编码管理员账号
+      if (username === 'admin' && password === 'admin123') {
+        userInfo = { username: 'admin', role: 'admin' };
+        isAdmin = true;
+      }
+      // 硬编码普通用户账号
+      else if (username === 'user1' && password === 'password123') {
+        userInfo = { username: 'user1', role: 'user' };
+      }
+    }
+    
+    // 5. 验证成功：生成JWT Token并返回
+    if (userInfo) {
       const token = jwt.sign(
-        { username: 'admin', role: 'admin' },
+        { username: userInfo.username, role: userInfo.role },
         JWT_SECRET,
-        { expiresIn: '2h' }
+        { expiresIn: '2h' } // Token有效期2小时
       );
       
       return res.json({
         status: 'success',
         token,
-        user: { username: 'admin', role: 'admin' },
-        message: '管理员登录成功'
+        user: { 
+          id: userInfo.id || 'default-' + Date.now(), // 兜底ID
+          username: userInfo.username, 
+          role: userInfo.role 
+        },
+        message: isAdmin ? '管理员登录成功' : '用户登录成功'
       });
     }
     
-    // 默认用户账号
-    if (username === 'user1' && password === 'password123') {
-      const jwt = require('jsonwebtoken');
-      const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
-      
-      const token = jwt.sign(
-        { username: 'user1', role: 'user' },
-        JWT_SECRET,
-        { expiresIn: '2h' }
-      );
-      
-      return res.json({
-        status: 'success',
-        token,
-        user: { username: 'user1', role: 'user' },
-        message: '用户登录成功'
-      });
-    }
-    
+    // 6. 所有验证均失败
+    console.log('登录失败：用户名或密码错误，用户名:', username);
     return res.status(401).json({
       status: 'error',
       message: '用户名或密码错误'
     });
     
   } catch (error) {
-    console.error('登录失败:', error);
+    console.error('登录接口异常:', error);
     return res.status(500).json({
       status: 'error',
       message: '登录失败，请稍后重试'
     });
   }
 });
+
+/**
+ * 中间件配置（补充缺失的核心中间件）
+ */
+app.use(cors({
+  origin: ['https://longlong.baby', 'http://dao.longlong.baby', 'http://localhost:3003'],
+  credentials: true
+}));
+app.use(helmet()); // 安全头部配置
+app.use(morgan('dev')); // 日志中间件
+app.use(express.json()); // 解析JSON请求体（必须配置，否则无法获取req.body）
+app.use(express.urlencoded({ extended: true })); // 解析表单格式请求体
 
 /**
  * 路由配置
@@ -189,8 +209,6 @@ app.use('/api/chat', chatRoutes); // 聊天接口（保留兼容性）
 app.use('/api/user-chat', userChatRoutes); // 用户聊天接口
 app.use('/api/admin-chat', adminChatRoutes); // 管理员聊天接口
 
-
-
 /**
  * 404处理中间件
  */
@@ -199,7 +217,8 @@ app.use((req, res, next) => {
     success: false,
     error: '接口不存在',
     path: req.path,
-    method: req.method
+    method: req.method,
+    message: `请求的接口 ${req.method} ${req.path} 不存在`
   });
 });
 
@@ -224,7 +243,8 @@ app.use((err, req, res, next) => {
   // 返回友好的错误响应
   res.status(500).json({
     success: false,
-    error: '服务器内部错误，请稍后重试',
+    error: '服务器内部错误',
+    message: '服务器内部错误，请稍后重试',
     errorId: new Date().getTime()
   });
 });
@@ -246,7 +266,7 @@ async function startServer() {
       console.log(`🌐 IP访问: http://47.83.203.60:${PORT}`);
       console.log(`🌐 域名访问: http://dao.longlong.baby:${PORT}`);
       console.log(`🌐 域名访问: http://longlong.baby:${PORT}`);
-      console.log(`👤 API接口: /api/user | /api/admin`);
+      console.log(`👤 API接口: /api/user | /api/admin | /api/login（统一登录）`);
     });
 
     // 设置服务器超时

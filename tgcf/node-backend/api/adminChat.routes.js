@@ -126,7 +126,7 @@ router.post('/upload', adminAuthMiddleware, upload.single('file'), async (req, r
             return res.status(400).json({ success: false, error: '发送者名不能为空' });
         }
         
-        const fileUrl = `http://localhost:3003/uploads/${req.file.filename}`;
+        const fileUrl = `/uploads/${req.file.filename}`;
         
         const messageData = {
             sender_name,

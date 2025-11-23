@@ -147,9 +147,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 setTimeout(() => {
                     if (userInfo.role === 'admin') {
-                        window.location.href = '../admin-web/admin.html';
+                        window.location.href = '/admin-web/admin.html';
                     } else {
-                        window.location.href = '天官赐福首页.html';
+                        window.location.href = '/user-web/天官赐福首页.html';
                     }
                 }, 1500);
                 

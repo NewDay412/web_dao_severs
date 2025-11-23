@@ -517,9 +517,11 @@
         async function submitReview(event) {
             event.preventDefault();
             
-            // 检查用户是否登录
-            const token = localStorage.getItem('user_token');
-            if (!token) {
+            // 检查用户是否登录（普通用户或管理员）
+            const userToken = localStorage.getItem('user_token');
+            const adminToken = localStorage.getItem('admin_token');
+            
+            if (!userToken && !adminToken) {
                 showNotification('请先登录后再提交评价', 'error');
                 setTimeout(() => {
                     window.location.href = '/user-web/登录页面.html';
@@ -542,6 +544,9 @@
             }
             
             try {
+                // 确定使用哪个token（优先使用普通用户token）
+                const token = userToken || adminToken;
+                
                 const response = await fetch('/api/user/review', {
                     method: 'POST',
                     headers: {
@@ -657,14 +662,34 @@
         // 导航栏相关函数
         function checkLoginStatus() {
             const userInfo = localStorage.getItem('user_user');
-            const token = localStorage.getItem('user_token');
-            if (userInfo && token) {
-                const user = JSON.parse(userInfo);
-                document.getElementById('loginItem').style.display = 'none';
-                document.getElementById('registerItem').style.display = 'none';
-                document.getElementById('logoutItem').style.display = 'block';
-                document.getElementById('userInfoItem').style.display = 'block';
-                document.getElementById('welcomeText').textContent = `欢迎，${user.username}`;
+            const adminUser = localStorage.getItem('admin_user');
+            const loginItem = document.getElementById('loginItem');
+            const registerItem = document.getElementById('registerItem');
+            const logoutItem = document.getElementById('logoutItem');
+            const userInfoItem = document.getElementById('userInfoItem');
+            const welcomeText = document.getElementById('welcomeText');
+            
+            // 检查是否有用户登录（普通用户或管理员）
+            let loggedInUser = null;
+            if (userInfo && userInfo !== 'undefined' && userInfo !== 'null') {
+                loggedInUser = JSON.parse(userInfo);
+            } else if (adminUser && adminUser !== 'undefined' && adminUser !== 'null') {
+                loggedInUser = JSON.parse(adminUser);
+            }
+            
+            if (loggedInUser) {
+                // 用户已登录，显示退出按钮和欢迎信息
+                if (loginItem) loginItem.style.display = 'none';
+                if (registerItem) registerItem.style.display = 'none';
+                if (logoutItem) logoutItem.style.display = 'block';
+                if (userInfoItem) userInfoItem.style.display = 'block';
+                if (welcomeText) welcomeText.textContent = `欢迎，${loggedInUser.username}`;
+            } else {
+                // 用户未登录，显示登录和注册按钮
+                if (loginItem) loginItem.style.display = 'block';
+                if (registerItem) registerItem.style.display = 'block';
+                if (logoutItem) logoutItem.style.display = 'none';
+                if (userInfoItem) userInfoItem.style.display = 'none';
             }
         }
 
@@ -734,8 +759,20 @@
 
         // 用户退出函数
         function logout() {
-            localStorage.removeItem('user_user');
-            localStorage.removeItem('user_token');
+            // 检查当前登录的是普通用户还是管理员
+            const user = localStorage.getItem('user_user');
+            const adminUser = localStorage.getItem('admin_user');
+            
+            if (user && user !== 'undefined' && user !== 'null') {
+                // 普通用户退出，只清除普通用户信息
+                localStorage.removeItem('user_user');
+                localStorage.removeItem('user_token');
+            } else if (adminUser && adminUser !== 'undefined' && adminUser !== 'null') {
+                // 管理员退出，只清除管理员信息
+                localStorage.removeItem('admin_user');
+                localStorage.removeItem('admin_token');
+            }
+            
             alert('已成功退出');
             window.location.href = '/user-web/登录页面.html';
         }

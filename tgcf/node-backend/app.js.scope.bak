@@ -198,21 +198,11 @@ app.post('/api/login', async (req, res) => {
  * 中间件配置（补充缺失的核心中间件）
  */
 app.use(cors({
-  origin: ['https://longlong.baby', 'http://dao.longlong.baby', 'http://longlong.baby1', 'http://localhost:3003', 'http://47.83.203.60', 'http://localhost:8080', 'http://localhost:8000', 'http://localhost'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: ['https://longlong.baby', 'http://dao.longlong.baby', 'http://localhost:3003'],
+  credentials: true
 }));
 app.use(helmet()); // 安全头部配置
 app.use(morgan('dev')); // 日志中间件
-
-/**
- * 静态文件服务配置
- */
-app.use('/user-web', express.static(path.join(__dirname, '../user-web')));
-app.use('/admin-web', express.static(path.join(__dirname, '../admin-web')));
-app.use('/img', express.static(path.join(__dirname, '../img')));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 
 
@@ -271,8 +261,6 @@ app.use((err, req, res, next) => {
  */
 async function startServer() {
   try {
-    // 确保PORT在函数作用域内可用
-    const PORT = process.env.PORT || 3003;
     // 初始化数据库
     await db.initializeDatabase();
     console.log('✅ 数据库初始化成功');

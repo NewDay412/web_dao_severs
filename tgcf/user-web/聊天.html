@@ -11,28 +11,22 @@
             
             // 为CSS文件提供备用路径
             if (element.href && element.href.includes('bootstrap.min.css')) {
-    <link href=" /css/responsive-navbar.css rel=stylesheet>
                 element.href = '/bootstrap-5.3.2/dist/css/bootstrap.min.css';
-    <link href=" /css/responsive-navbar.css rel=stylesheet>
             } else if (element.href && element.href.includes('bootstrap-icons.min.css')) {
                 element.href = '/icons-1.11.1/font/bootstrap-icons.min.css';
             }
             
             // 为JS文件提供备用路径
             if (element.src && element.src.includes('bootstrap.bundle.min.js')) {
-    <script src=" /js/responsive-navigation.js></script>
                 element.src = '/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js';
-    <script src=" /js/responsive-navigation.js></script>
             } else if (element.src && element.src.includes('jquery-3.6.0.min.js')) {
-    <script src=" /js/responsive-navigation.js></script>
                 element.src = '../js/jquery-3.6.0.min.js';
-    <script src=" /js/responsive-navigation.js></script>
             }
         }
     </script>
     
     <link href="/bootstrap-5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" onerror="resourceLoadError(this)">
-    <link href=" /css/responsive-navbar.css rel=stylesheet>
+    <link href="/css/responsive-navbar.css" rel="stylesheet">
     <link rel="stylesheet" href="/icons-1.11.1/font/bootstrap-icons.min.css" onerror="resourceLoadError(this)">
     <link href="../css/responsive-enhanced.css" rel="stylesheet">
     
@@ -576,16 +570,23 @@
         }
         
         function updateNavbarLoginStatus() {
-            const user = localStorage.getItem('user_user');
-            const loginItem = document.getElementById('loginItem');
-            const registerItem = document.getElementById('registerItem');
-            const logoutItem = document.getElementById('logoutItem');
-            const userInfoItem = document.getElementById('userInfoItem');
-            const welcomeText = document.getElementById('welcomeText');
-            
             try {
-                if (user && user !== 'undefined' && user !== 'null') {
-                    const parsedUser = JSON.parse(user);
+                const userUser = localStorage.getItem('user_user');
+                const userToken = localStorage.getItem('user_token');
+                const adminUser = localStorage.getItem('admin_user');
+                const adminToken = localStorage.getItem('admin_token');
+                
+                const loginItem = document.getElementById('loginItem');
+                const registerItem = document.getElementById('registerItem');
+                const logoutItem = document.getElementById('logoutItem');
+                const userInfoItem = document.getElementById('userInfoItem');
+                const welcomeText = document.getElementById('welcomeText');
+                
+                // 检查普通用户或管理员是否已登录
+                const loggedInUser = userUser && userToken ? JSON.parse(userUser) : 
+                                   adminUser && adminToken ? JSON.parse(adminUser) : null;
+                
+                if (loggedInUser) {
                     if (loginItem) loginItem.style.display = 'none';
                     if (registerItem) registerItem.style.display = 'none';
                     if (logoutItem) logoutItem.style.display = 'block';
@@ -593,7 +594,8 @@
                     if (welcomeText) {
                         const welcomeSpan = welcomeText.querySelector('span');
                         if (welcomeSpan) {
-                            welcomeSpan.textContent = `欢迎 ${parsedUser.username || '用户'}`;
+                            const userType = userUser && userToken ? '用户' : '管理员';
+                            welcomeSpan.textContent = `欢迎 ${loggedInUser.username || '用户'} (${userType})`;
                         }
                     }
                 } else {
@@ -604,6 +606,11 @@
                 }
             } catch (e) {
                 console.error('更新导航栏登录状态时出错:', e);
+                const loginItem = document.getElementById('loginItem');
+                const registerItem = document.getElementById('registerItem');
+                const logoutItem = document.getElementById('logoutItem');
+                const userInfoItem = document.getElementById('userInfoItem');
+                
                 if (loginItem) loginItem.style.display = 'block';
                 if (registerItem) registerItem.style.display = 'block';
                 if (logoutItem) logoutItem.style.display = 'none';
@@ -613,15 +620,28 @@
         
         function logout() {
             try {
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
+                // 检查当前登录的是普通用户还是管理员
+                const userUser = localStorage.getItem('user_user');
+                const adminUser = localStorage.getItem('admin_user');
+                
+                if (userUser) {
+                    // 清除普通用户登录信息
+                    localStorage.removeItem('user_user');
+                    localStorage.removeItem('user_token');
+                    localStorage.removeItem('userRole');
+                } else if (adminUser) {
+                    // 清除管理员登录信息
+                    localStorage.removeItem('admin_user');
+                    localStorage.removeItem('admin_token');
+                }
+                
                 updateNavbarLoginStatus();
-                alert('  退出成功');
-                console.log('用户已  退出');
+                alert('退出成功');
+                console.log('用户已退出');
                 window.location.href = '/user-web/登录页面.html';
             } catch (error) {
-                console.error('  退出失败:', error);
-                alert('  退出过程中出现错误');
+                console.error('退出失败:', error);
+                alert('退出过程中出现错误');
             }
         }
         
@@ -630,11 +650,13 @@
          * @returns {boolean} 用户是否已登录
          */
         function checkLoginForChat() {
-            const user = localStorage.getItem('user_user');
-            const token = localStorage.getItem('user_token');
+            const userUser = localStorage.getItem('user_user');
+            const userToken = localStorage.getItem('user_token');
+            const adminUser = localStorage.getItem('admin_user');
+            const adminToken = localStorage.getItem('admin_token');
             
-            // 验证用户信息和令牌是否存在
-            if (!user || !token) {
+            // 验证用户信息和令牌是否存在（普通用户或管理员）
+            if ((!userUser || !userToken) && (!adminUser || !adminToken)) {
                 alert('请先登录');
                 window.location.href = '/user-web/登录页面.html';
                 return false;
@@ -642,12 +664,17 @@
             
             try {
                 // 尝试解析用户信息
-                JSON.parse(user);
+                const userData = userUser && userToken ? JSON.parse(userUser) : JSON.parse(adminUser);
                 return true;
             } catch (error) {
                 // 用户信息格式错误，清除本地存储并跳转登录
-                localStorage.removeItem('user_user');
-                localStorage.removeItem('user_token');
+                if (userUser && userToken) {
+                    localStorage.removeItem('user_user');
+                    localStorage.removeItem('user_token');
+                } else if (adminUser && adminToken) {
+                    localStorage.removeItem('admin_user');
+                    localStorage.removeItem('admin_token');
+                }
                 alert('用户信息异常，请重新登录');
                 window.location.href = '/user-web/登录页面.html';
                 return false;
@@ -716,15 +743,25 @@
         });
         
         function checkLogin() {
-            const user = localStorage.getItem('user_user');
-            if (!user) {
+            const userUser = localStorage.getItem('user_user');
+            const userToken = localStorage.getItem('user_token');
+            const adminUser = localStorage.getItem('admin_user');
+            const adminToken = localStorage.getItem('admin_token');
+            
+            if ((!userUser || !userToken) && (!adminUser || !adminToken)) {
                 alert('请先登录');
                 window.location.href = '/user-web/登录页面.html';
                 return;
             }
             
             try {
-                currentUser = JSON.parse(user);
+                // 确定当前登录的是普通用户还是管理员
+                if (userUser && userToken) {
+                    currentUser = JSON.parse(userUser);
+                } else if (adminUser && adminToken) {
+                    currentUser = JSON.parse(adminUser);
+                }
+                
                 document.getElementById('chatUserInfo').textContent = `当前用户: ${currentUser.username}`;
             } catch (e) {
                 alert('登录信息异常，请重新登录');
@@ -734,9 +771,14 @@
         
         async function loadMessages(forceRefresh = false) {
             try {
+                // 确定使用哪个token（优先使用普通用户token）
+                const userToken = localStorage.getItem('user_token');
+                const adminToken = localStorage.getItem('admin_token');
+                const token = userToken || adminToken;
+                
                 const response = await fetch(`/api/user-chat/messages/${currentUser.username}`, {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('user_token')}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
                 
@@ -909,6 +951,6 @@
     </script>
     
     <script src="/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src=" /js/responsive-navigation.js></script>
+    <script src="/js/responsive-navigation.js"></script>
 </body> 
 </html>

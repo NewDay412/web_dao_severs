@@ -20,11 +20,16 @@ class HomeContentModel {
         params = ['published'];
       }
       
+      console.log('执行查询:', query, '参数:', params);
       const [rows] = await db.execute(query, params);
+      console.log('查询结果:', rows.length, '条记录');
       return rows;
     } catch (error) {
-      console.error('获取首页内容列表失败:', error);
-      throw new Error('获取首页内容列表失败');
+      console.error('获取首页内容列表失败 - 错误详情:', error);
+      console.error('错误类型:', error.constructor.name);
+      console.error('错误代码:', error.code);
+      console.error('SQL状态:', error.sqlState);
+      throw new Error(`获取首页内容列表失败: ${error.message}`);
     }
   }
 

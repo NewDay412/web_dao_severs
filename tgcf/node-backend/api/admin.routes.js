@@ -1298,7 +1298,7 @@ router.get('/content', asyncHandler(async (req, res) => {
             { id: '3', title: '故事介绍', author: '管理员', create_time: new Date().toISOString().slice(0, 19).replace('T', ' ') }
         ];
         
-        return successResponse(res, '获取内容成功', mockContentList);
+        return successResponse(res, contentList, '获取内容成功');
     } catch (error) {
         console.error('获取内容列表失败:', error);
         return errorResponse(res, '获取内容失败');

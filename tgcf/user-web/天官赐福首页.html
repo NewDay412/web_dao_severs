@@ -1406,15 +1406,24 @@
                 
                 // 创建超时控制器，防止请求无限等待
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+                const timeoutId = setTimeout(() => {
+                    console.log('请求超时，中止请求');
+                    controller.abort();
+                }, 30000); // 延长到30秒超时
                 
                 console.log('尝试从API获取内容:', '/api/user/home-content');
-                const response = await fetch('/api/user/home-content', {
+                console.log('当前URL:', window.location.href);
+                console.log('API请求URL:', new URL('/api/user/home-content', window.location.origin).href);
+                // 使用绝对路径确保在不同环境下都能正确访问API
+                const apiUrl = new URL('/api/user/home-content', window.location.origin).href;
+                console.log('使用绝对路径请求API:', apiUrl);
+                const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    signal: controller.signal
+                    signal: controller.signal,
+                    credentials: 'include' // 包含cookies以确保会话一致性
                 });
                 
                 clearTimeout(timeoutId);
@@ -1461,16 +1470,26 @@
                 
             } catch (error) {
                 console.error('加载内容失败:', error);
+                console.error('错误详情:', { 
+                    name: error.name, 
+                    message: error.message, 
+                    stack: error.stack,
+                    timestamp: new Date().toISOString()
+                });
                 
                 // 分类处理不同类型的错误
                 let errorMessage = '加载内容时出现问题';
                 if (error.name === 'AbortError') {
                     errorMessage = '请求超时，请检查网络连接';
+                    console.error('可能原因：1. 网络延迟过高 2. 服务器响应时间过长 3. 跨域问题');
                 } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
                     errorMessage = '网络连接错误，请检查服务器状态';
                 }
                 
-                contentContainer.innerHTML = '<div class="col-12 text-center"><p class="text-muted">加载失败，请稍后重试</p></div>';
+                contentContainer.innerHTML = `<div class="col-12 text-center">
+                    <p class="text-muted">${errorMessage}</p>
+                    <p class="text-xs text-gray-500">错误类型: ${error.name}</p>
+                </div>`;
             }
         }
         
@@ -1710,6 +1729,7 @@
         // 检查并更新导航栏登录状态的函数
         function updateNavbarLoginStatus() {
             const user = localStorage.getItem('user_user');
+            const adminUser = localStorage.getItem('admin_user');
             const loginItem = document.getElementById('loginItem');
             const registerItem = document.getElementById('registerItem');
             const logoutItem = document.getElementById('logoutItem');
@@ -1717,14 +1737,19 @@
             const welcomeText = document.getElementById('welcomeText');
             
             try {
-                if (user && user !== 'undefined' && user !== 'null') {
-                    const parsedUser = JSON.parse(user);
+                // 检查是否有用户登录（普通用户或管理员）
+                const loggedInUser = user && user !== 'undefined' && user !== 'null' ? 
+                    JSON.parse(user) : 
+                    (adminUser && adminUser !== 'undefined' && adminUser !== 'null' ? 
+                     JSON.parse(adminUser) : null);
+                
+                if (loggedInUser) {
                     // 用户已登录，显示  退出按钮和欢迎信息
                     if (loginItem) loginItem.style.display = 'none';
                     if (registerItem) registerItem.style.display = 'none';
                     if (logoutItem) logoutItem.style.display = 'block';
                     if (userInfoItem) userInfoItem.style.display = 'block';
-                    if (welcomeText) welcomeText.textContent = `欢迎 ${parsedUser.username || '用户'}`;
+                    if (welcomeText) welcomeText.textContent = `欢迎 ${loggedInUser.username || '用户'}`;
                 } else {
                     // 用户未登录，显示登录和注册按钮
                     if (loginItem) loginItem.style.display = 'block';

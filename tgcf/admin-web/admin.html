@@ -7,6 +7,32 @@
     <title>后台管理系统 - 天官赐福</title>
     <script>
       /**
+       * 检查管理员登录状态
+       * 如果未登录则跳转到登录页面
+       */
+      function checkAdminLoginStatus() {
+        const adminToken = localStorage.getItem('admin_token');
+        const adminUser = localStorage.getItem('admin_user');
+        
+        if (!adminToken || !adminUser) {
+          // 未登录，跳转到登录页面
+          window.location.href = '../user-web/登录页面.html';
+          return false;
+        }
+        
+        // 验证token格式（简单验证）
+        if (adminToken.length < 10) {
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('admin_user');
+          localStorage.removeItem('admin_role');
+          window.location.href = '../user-web/登录页面.html';
+          return false;
+        }
+        
+        return true;
+      }
+
+      /**
        * 资源加载错误处理函数
        * @param {HTMLElement} element - 加载失败的DOM元素
        */
@@ -66,11 +92,15 @@
         });
       }
 
-      // 页面加载完成后修复API URL
+      // 页面加载完成后修复API URL并检查登录状态
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fixApiUrls);
+        document.addEventListener('DOMContentLoaded', function() {
+          fixApiUrls();
+          checkAdminLoginStatus();
+        });
       } else {
         fixApiUrls();
+        checkAdminLoginStatus();
       }
     </script>
     <link href="../css/bootstrap.min.css" rel="stylesheet" onerror="handleResourceError(this)" />
@@ -4603,8 +4633,9 @@
 
         try {
           // 尝试保存到后端
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            "/api/admin/site-settings",
+            `${apiBaseUrl}/api/admin/site-settings`,
             {
               method: "PUT",
               headers: {
@@ -4649,8 +4680,9 @@
        */
       async function editBasicInfo(id) {
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin/basic-info/${id}`,
+            `${apiBaseUrl}/api/admin/basic-info/${id}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("admin_token") || ""}`,
@@ -4737,8 +4769,9 @@
         }
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin/basic-info/${id}`,
+            `${apiBaseUrl}/api/admin/basic-info/${id}`,
             {
               method: "PUT",
               headers: {
@@ -4803,7 +4836,8 @@
               apiUrl = `/api/admin/home-content/${id}`;
             }
 
-            const response = await fetch(apiUrl, {
+            const apiBaseUrl = getApiBaseUrl();
+            const response = await fetch(`${apiBaseUrl}${apiUrl}`, {
               method: "DELETE",
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("admin_token") || ""}`,
@@ -4857,7 +4891,8 @@
         }
         
         try {
-          const response = await fetch('/api/admin/carousel', {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/api/admin/carousel`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -4890,7 +4925,8 @@
       
       async function editCarousel(id) {
         try {
-          const response = await fetch(`/api/admin/carousel/${id}`, {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/api/admin/carousel/${id}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
             }
@@ -5027,7 +5063,8 @@
         }
         
         try {
-          const response = await fetch(`/api/admin/carousel/${id}`, {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/api/admin/carousel/${id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -5064,7 +5101,8 @@
         }
         
         try {
-          const response = await fetch(`/api/admin/carousel/${id}`, {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/api/admin/carousel/${id}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
@@ -5098,7 +5136,8 @@
         }
         
         if (file.size > 5 * 1024 * 1024) {
-          alert('图片大小不能超过5MB');
+          alert('图片过大，请上传小于5MB');
+          fileInput.value = ''; // 清空文件选择
           return;
         }
         

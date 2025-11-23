@@ -546,6 +546,18 @@
     </div>
 
     <script>
+      // 动态获取API基础URL
+      function getApiBaseUrl() {
+        // 检查当前域名，如果是本地开发环境则使用localhost，否则使用相对路径（通过Nginx代理）
+        const currentHost = window.location.hostname;
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+          return 'http://localhost:3003';
+        } else {
+          // 域名访问时使用相对路径，通过Nginx代理到后端服务
+          return '';
+        }
+      }
+
       // 表单验证逻辑
       function validateLoginForm() {
         const username = document.getElementById("username").value.trim();
@@ -588,7 +600,8 @@
       async function submitLogin(username, password) {
         try {
           // 使用统一的登录接口
-          const response = await fetch("/api/login", {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/api/login`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -614,18 +627,11 @@
           
           if (isSuccess) {
             // 检查用户角色
-            const user = result.user || {};
-            const isAdmin = user.role === 'admin';
+          const user = result.user || {};
+          const isAdmin = user.role === 'admin' || user.role === 'super_admin';
             
-            // 清除旧的登录信息
-            localStorage.removeItem("admin_token");
-            localStorage.removeItem("admin_user");
-            localStorage.removeItem("admin_role");
-            localStorage.removeItem("user_token");
-            localStorage.removeItem("user_user");
-            localStorage.removeItem("user_role");
-
-            // 存储登录信息 - 使用不同的键名区分管理员和普通用户
+            // 不自动清除其他类型的登录信息，允许同时登录
+            // 只存储当前登录的用户信息，保留其他类型的登录状态
             if (isAdmin) {
               localStorage.setItem("admin_token", result.token);
               localStorage.setItem(
@@ -693,7 +699,7 @@
       // 关闭弹窗并跳转
       function closeModal() {
         document.getElementById("successModal").classList.remove("show");
-        const isAdmin = localStorage.getItem("admin_role") === "admin";
+        const isAdmin = localStorage.getItem("admin_role") === "admin" || localStorage.getItem("admin_role") === "super_admin";
         if (isAdmin) {
           window.location.href = "/admin-web/admin.html";
         } else {

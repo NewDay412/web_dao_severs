@@ -3,7 +3,7 @@ const db = require('../config/db');
 class CarouselModel {
     static async createTable() {
         const sql = `
-            CREATE TABLE IF NOT EXISTS web_project.carousel (
+            CREATE TABLE IF NOT EXISTS web_project.carousel_images (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 title VARCHAR(255) NOT NULL COMMENT '轮播图标题',
                 image_url VARCHAR(500) NOT NULL COMMENT '图片URL',
@@ -26,7 +26,7 @@ class CarouselModel {
     }
 
     static async getAll() {
-        const sql = 'SELECT * FROM web_project.carousel ORDER BY display_order ASC, create_time DESC';
+        const sql = 'SELECT * FROM web_project.carousel_images ORDER BY display_order ASC, create_time DESC';
         try {
             const [rows] = await db.execute(sql);
             return rows;
@@ -37,7 +37,7 @@ class CarouselModel {
     }
 
     static async getActive() {
-        const sql = 'SELECT * FROM web_project.carousel WHERE is_active = 1 ORDER BY display_order ASC';
+        const sql = 'SELECT * FROM web_project.carousel_images WHERE is_active = 1 ORDER BY display_order ASC';
         try {
             const [rows] = await db.execute(sql);
             return rows;
@@ -48,7 +48,7 @@ class CarouselModel {
     }
 
     static async getById(id) {
-        const sql = 'SELECT * FROM web_project.carousel WHERE id = ?';
+        const sql = 'SELECT * FROM web_project.carousel_images WHERE id = ?';
         try {
             const [rows] = await db.execute(sql, [id]);
             return rows[0];
@@ -60,7 +60,7 @@ class CarouselModel {
 
     static async create(data) {
         const sql = `
-            INSERT INTO web_project.carousel (title, image_url, link_url, description, display_order, is_active)
+            INSERT INTO web_project.carousel_images (title, image_url, link_url, description, display_order, is_active)
             VALUES (?, ?, ?, ?, ?, ?)
         `;
         try {
@@ -81,7 +81,7 @@ class CarouselModel {
 
     static async update(id, data) {
         const sql = `
-            UPDATE web_project.carousel 
+            UPDATE web_project.carousel_images 
             SET title = ?, image_url = ?, link_url = ?, description = ?, display_order = ?, is_active = ?
             WHERE id = ?
         `;
@@ -103,7 +103,7 @@ class CarouselModel {
     }
 
     static async delete(id) {
-        const sql = 'DELETE FROM web_project.carousel WHERE id = ?';
+        const sql = 'DELETE FROM web_project.carousel_images WHERE id = ?';
         try {
             const [result] = await db.execute(sql, [id]);
             return result.affectedRows > 0;

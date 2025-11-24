@@ -20,7 +20,7 @@
             if (element.tagName === 'LINK') {
                 const backupPath = element.href.includes('bootstrap.min.css') 
                     ? '../css/bootstrap.min.css' 
-                    : '/icons-1.11.1/font/bootstrap-icons.min.css';
+                    : '../icons-1.11.1/font/bootstrap-icons.min.css';
                 element.href = backupPath;
                 console.log(`尝试备用路径: ${backupPath}`);
             }
@@ -368,7 +368,7 @@
                             <a class="nav-link" href="/user-web/角色介绍.html">角色介绍</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#作品评价">作品评价</a>
+                            <a class="nav-link active" href="#作品评价">作品评价</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#" onclick="checkLoginForFeature('/user-web/留言板.html', '留言板'); return false;">留言板</a>
@@ -377,7 +377,7 @@
                             <a class="nav-link" href="#" onclick="checkLoginForChat(); return false;">在线聊天</a>
                         </li>
                         <li class="nav-item" id="logoutItem" style="display:none;">
-                            <a class="nav-link" href="#" onclick="logout(); return false;">  退出</a>
+                            <a class="nav-link" href="#" onclick="logout(); return false;">退出</a>
                         </li>
                         <li class="nav-item" id="userInfoItem" style="display:none;">
                             <span class="nav-link text-warning" id="welcomeText">欢迎</span>
@@ -450,7 +450,7 @@
     </div>
 
     <script src="/bootstrap-5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src=" /js/responsive-navigation.js></script>
+    <script src="/js/responsive-navigation.js"></script>
     <script>
         let currentRating = 0;
         
@@ -656,7 +656,7 @@
                         }
                     }, 300);
                 }
-            }, 3003);
+            }, 3000);
         }
 
         // 导航栏相关函数

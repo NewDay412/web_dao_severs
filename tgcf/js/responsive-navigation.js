@@ -10,6 +10,7 @@ class ResponsiveNavigation {
 
     init() {
         this.setupMobileMenu();
+        this.setupNavbarClickToggle();
         this.setupResizeHandler();
         this.setupClickOutside();
         this.setupKeyboardNavigation();
@@ -24,8 +25,10 @@ class ResponsiveNavigation {
         const navbarCollapse = document.querySelector('.navbar-collapse');
         
         if (toggleButton && navbarCollapse) {
+            // 导航栏切换按钮点击事件
             toggleButton.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.toggleMobileMenu();
             });
 
@@ -42,6 +45,37 @@ class ResponsiveNavigation {
     }
 
     /**
+     * 设置导航栏点击切换功能
+     */
+    setupNavbarClickToggle() {
+        // 为所有导航栏添加点击切换功能
+        const navbars = document.querySelectorAll('.navbar, .navbar-container');
+        
+        navbars.forEach(navbar => {
+            // 防止重复添加事件监听器
+            if (navbar.hasAttribute('data-navbar-toggle-initialized')) {
+                return;
+            }
+            navbar.setAttribute('data-navbar-toggle-initialized', 'true');
+            
+            navbar.addEventListener('click', (e) => {
+                // 只在移动端生效
+                if (window.innerWidth < 992) {
+                    // 检查点击的是否为交互元素
+                    const isInteractiveElement = e.target.closest('a, button, input, select, textarea, .nav-link, .navbar-toggler');
+                    
+                    // 如果不是交互元素，则切换菜单状态
+                    if (!isInteractiveElement) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.toggleMobileMenu();
+                    }
+                }
+            });
+        });
+    }
+
+    /**
      * 切换移动端菜单
      */
     toggleMobileMenu() {
@@ -49,7 +83,10 @@ class ResponsiveNavigation {
         const toggleButton = document.querySelector('.navbar-toggler');
         
         if (navbarCollapse) {
-            const isOpen = navbarCollapse.classList.contains('show');
+            // 检查多种可能的展开状态
+            const isOpen = navbarCollapse.classList.contains('show') || 
+                         navbarCollapse.classList.contains('collapsing') ||
+                         (toggleButton && toggleButton.getAttribute('aria-expanded') === 'true');
             
             if (isOpen) {
                 this.closeMobileMenu();
@@ -66,9 +103,16 @@ class ResponsiveNavigation {
         const navbarCollapse = document.querySelector('.navbar-collapse');
         const toggleButton = document.querySelector('.navbar-toggler');
         
-        if (navbarCollapse) {
-            navbarCollapse.classList.add('show');
-            navbarCollapse.style.maxHeight = navbarCollapse.scrollHeight + 'px';
+        if (navbarCollapse && !navbarCollapse.classList.contains('show')) {
+            // 优先使用Bootstrap的collapse功能（如果可用）
+            if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(navbarCollapse);
+                bsCollapse.show();
+            } else {
+                // 降级处理
+                navbarCollapse.classList.add('show');
+                navbarCollapse.style.maxHeight = navbarCollapse.scrollHeight + 'px';
+            }
             
             // 更新按钮状态
             if (toggleButton) {
@@ -76,8 +120,8 @@ class ResponsiveNavigation {
                 toggleButton.classList.add('active');
             }
             
-            // 防止背景滚动
-            document.body.style.overflow = 'hidden';
+            // 保持背景可滚动（根据题目要求）
+            document.body.classList.add('navbar-expanded');
             
             // 触发自定义事件
             this.dispatchEvent('mobileMenuOpen');
@@ -91,9 +135,16 @@ class ResponsiveNavigation {
         const navbarCollapse = document.querySelector('.navbar-collapse');
         const toggleButton = document.querySelector('.navbar-toggler');
         
-        if (navbarCollapse) {
-            navbarCollapse.classList.remove('show');
-            navbarCollapse.style.maxHeight = '0';
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            // 优先使用Bootstrap的collapse功能（如果可用）
+            if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(navbarCollapse);
+                bsCollapse.hide();
+            } else {
+                // 降级处理
+                navbarCollapse.classList.remove('show');
+                navbarCollapse.style.maxHeight = '0';
+            }
             
             // 更新按钮状态
             if (toggleButton) {
@@ -102,6 +153,7 @@ class ResponsiveNavigation {
             }
             
             // 恢复背景滚动
+            document.body.classList.remove('navbar-expanded');
             document.body.style.overflow = '';
             
             // 触发自定义事件
@@ -231,6 +283,25 @@ class ResponsiveNavigation {
      */
     isDesktop() {
         return window.innerWidth >= 992;
+    }
+
+    /**
+     * 重新初始化导航功能（用于动态加载的内容）
+     */
+    reinitialize() {
+        // 移除旧的事件监听器（如果需要）
+        this.cleanup();
+        
+        // 重新初始化
+        this.init();
+    }
+
+    /**
+     * 清理事件监听器
+     */
+    cleanup() {
+        // 这里可以添加清理逻辑，如果需要的话
+        // 目前不需要特别的清理，因为事件监听器会自动覆盖
     }
 }
 
@@ -524,6 +595,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showNotification = (message, type, duration) => {
         responsiveNotification.show(message, type, duration);
     };
+    
+    // 全局导航重新初始化函数
+    window.reinitializeNavigation = () => {
+        if (responsiveNav) {
+            responsiveNav.reinitialize();
+        }
+    };
 });
 
 // 导出类供其他脚本使用
@@ -535,3 +613,6 @@ if (typeof module !== 'undefined' && module.exports) {
         ResponsiveNotification
     };
 }
+
+// 全局暴露类，供其他脚本使用
+window.ResponsiveNavigation = ResponsiveNavigation;

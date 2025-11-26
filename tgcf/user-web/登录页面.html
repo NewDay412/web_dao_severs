@@ -599,7 +599,7 @@
       // 提交登录请求
       async function submitLogin(username, password) {
         try {
-          // 使用统一的登录接口
+          // 使用统一的登录接口，后端只有/api/login接口
           const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(`${apiBaseUrl}/api/login`, {
             method: "POST",
@@ -623,24 +623,25 @@
           const result = await response.json();
           
           // 统一处理不同格式的响应
-          const isSuccess = result.success === true || result.status === 'success';
+          const isSuccess = result.success === true || result.status === 'success' || (result.data && result.data.token);
           
           if (isSuccess) {
             // 检查用户角色
-          const user = result.user || {};
-          const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+            const user = result.user || (result.data ? result.data.user : {});
+            const token = result.token || (result.data ? result.data.token : null);
+            const isAdmin = user.role === 'admin' || user.role === 'super_admin';
             
             // 不自动清除其他类型的登录信息，允许同时登录
             // 只存储当前登录的用户信息，保留其他类型的登录状态
             if (isAdmin) {
-              localStorage.setItem("admin_token", result.token);
+              localStorage.setItem("admin_token", token);
               localStorage.setItem(
                 "admin_user",
                 JSON.stringify(user)
               );
               localStorage.setItem("admin_role", "admin");
             } else {
-              localStorage.setItem("user_token", result.token);
+              localStorage.setItem("user_token", token);
               localStorage.setItem(
                 "user_user",
                 JSON.stringify(user)

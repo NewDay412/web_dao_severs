@@ -335,6 +335,72 @@
                 opacity: 0;
             }
         }
+
+        /* 新增：评价成功提示样式（主题色：红+金） */
+        .success-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            /* 主题红色渐变背景 */
+            background: linear-gradient(135deg, #9e2a2b 0%, #b83234 100%);
+            color: #fff;
+            padding: 25px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            /* 金色边框+阴影，呼应主题 */
+            box-shadow: 0 8px 32px rgba(158, 42, 43, 0.3), 0 0 0 2px #f9d71c;
+            z-index: 9999;
+            text-align: center;
+            animation: popIn 0.5s ease-out, fadeOut 0.5s ease-in 2.5s forwards;
+        }
+        
+        .success-toast i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            display: block;
+            /* 主题金色图标 */
+            color: #f9d71c;
+            animation: pulse 1s ease-in-out;
+            text-shadow: 0 0 8px rgba(249, 215, 28, 0.6);
+        }
+        
+        @keyframes popIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -563,12 +629,19 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showNotification('评价提交成功，等待审核后显示', 'success');
+                    // 显示主题色评价成功提示
+                    showSuccessToast('评价成功！');
+                    
                     // 清空表单
                     document.getElementById('reviewForm').reset();
                     setRating(0);
                     document.getElementById('ratingText').textContent = '请选择评分';
                     document.getElementById('charCount').textContent = '500';
+                    
+                    // 成功后延时刷新评价列表，让用户能看到自己的评价
+                    setTimeout(() => {
+                        loadUserReviews();
+                    }, 1000);
                 } else {
                     showNotification(result.error || '提交失败，请重试', 'error');
                 }
@@ -576,6 +649,36 @@
                 console.error('提交评价失败:', error);
                 showNotification('网络错误，请稍后重试', 'error');
             }
+        }
+        
+        // 显示主题色评价成功提示框
+        function showSuccessToast(message) {
+            // 移除已存在的提示
+            const existingToast = document.querySelector('.success-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // 创建新的提示框（文字颜色与主题呼应）
+            const toast = document.createElement('div');
+            toast.className = 'success-toast';
+            toast.innerHTML = `
+                <i class="bi bi-check-circle-fill"></i>
+                <div>${message}</div>
+                <div style="font-size: 14px; margin-top: 8px; opacity: 0.9; color: #f9d71c;">感谢您的宝贵反馈～</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    toast.style.animation = 'fadeOut 0.5s ease-in forwards';
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 500);
+                }
+            }, 3000);
         }
         
         // 加载用户评价
@@ -641,10 +744,55 @@
             });
             
             const notification = document.createElement('div');
-            notification.className = `notification bg-${type}`;
+            notification.className = `notification`;
+            
+            // 添加内联样式确保通知可见且美观
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                animation: slideIn 0.3s ease-out;
+                min-width: 200px;
+                text-align: center;
+            `;
+            
+            // 根据类型设置背景色
+            switch(type) {
+                case 'success':
+                    notification.style.backgroundColor = '#28a745';
+                    break;
+                case 'error':
+                    notification.style.backgroundColor = '#dc3545';
+                    break;
+                case 'info':
+                default:
+                    notification.style.backgroundColor = '#17a2b8';
+                    break;
+            }
+            
             notification.textContent = message;
             
             document.body.appendChild(notification);
+            
+            // 添加动画样式
+            const styleSheet = document.createElement("style");
+            styleSheet.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(styleSheet);
             
             // 3秒后自动消失
             setTimeout(() => {

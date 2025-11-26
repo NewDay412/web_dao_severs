@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片URL修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-image {
+            max-width: 200px;
+            height: auto;
+            margin: 10px;
+            border: 2px solid #ccc;
+        }
+        .url-display {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>图片URL修复测试</h1>
+    
+    <div class="test-section">
+        <h2>测试1: 错误的外部域名URL</h2>
+        <p>原始URL: <span class="url-display" id="original-url-1">https://longlong.baby/uploads/1764080516050-391066807.JPG</span></p>
+        <p>修复后URL: <span class="url-display" id="fixed-url-1"></span></p>
+        <img id="test-img-1" src="https://longlong.baby/uploads/1764080516050-391066807.JPG" class="test-image" alt="测试图片1">
+        <p>加载状态: <span id="status-1">加载中...</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试2: 相对路径URL</h2>
+        <p>原始URL: <span class="url-display" id="original-url-2">/uploads/1764080516050-391066807.JPG</span></p>
+        <p>修复后URL: <span class="url-display" id="fixed-url-2"></span></p>
+        <img id="test-img-2" src="/uploads/1764080516050-391066807.JPG" class="test-image" alt="测试图片2">
+        <p>加载状态: <span id="status-2">加载中...</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试3: 正确的本地URL</h2>
+        <p>原始URL: <span class="url-display" id="original-url-3">http://localhost:3003/uploads/1764080516050-391066807.JPG</span></p>
+        <p>修复后URL: <span class="url-display" id="fixed-url-3"></span></p>
+        <img id="test-img-3" src="http://localhost:3003/uploads/1764080516050-391066807.JPG" class="test-image" alt="测试图片3">
+        <p>加载状态: <span id="status-3">加载中...</span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>API测试</h2>
+        <button onclick="testApiConnection()">测试API连接</button>
+        <div id="api-result"></div>
+    </div>
+    
+    <script src="fix-image-urls.js"></script>
+    <script>
+        // 测试图片URL修复
+        function testImageFix() {
+            const tests = [
+                {
+                    id: 1,
+                    original: 'https://longlong.baby/uploads/1764080516050-391066807.JPG'
+                },
+                {
+                    id: 2,
+                    original: '/uploads/1764080516050-391066807.JPG'
+                },
+                {
+                    id: 3,
+                    original: 'http://localhost:3003/uploads/1764080516050-391066807.JPG'
+                }
+            ];
+            
+            tests.forEach(test => {
+                const originalUrl = test.original;
+                const fixedUrl = fixImageUrl(originalUrl);
+                
+                document.getElementById(`original-url-${test.id}`).textContent = originalUrl;
+                document.getElementById(`fixed-url-${test.id}`).textContent = fixedUrl;
+                
+                const img = document.getElementById(`test-img-${test.id}`);
+                const status = document.getElementById(`status-${test.id}`);
+                
+                // 更新图片src为修复后的URL
+                img.src = fixedUrl;
+                
+                img.onload = function() {
+                    status.textContent = '✅ 加载成功';
+                    status.className = 'success';
+                };
+                
+                img.onerror = function() {
+                    status.textContent = '❌ 加载失败';
+                    status.className = 'error';
+                };
+            });
+        }
+        
+        // 测试API连接
+        async function testApiConnection() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p>正在测试API连接...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:3003/api/user/character');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ API连接成功</p>
+                        <p>响应状态: ${response.status}</p>
+                        <p>数据: ${JSON.stringify(data, null, 2)}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ API响应错误</p>
+                        <p>状态码: ${response.status}</p>
+                        <p>错误信息: ${JSON.stringify(data, null, 2)}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p class="error">❌ API连接失败</p>
+                    <p>错误: ${error.message}</p>
+                `;
+            }
+        }
+        
+        // 页面加载完成后执行测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('开始图片URL修复测试');
+            testImageFix();
+        });
+    </script>
+</body>
+</html>

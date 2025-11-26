@@ -6,8 +6,8 @@ const jwt = require('jsonwebtoken');
 const { successResponse, errorResponse, unauthorizedResponse, validationErrorResponse, asyncHandler } = require('../utils/response.utils');
 const { validateParams } = require('../utils/validation.utils');
 
-// 密钥配置（生产环境应使用环境变量）
-const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
+// 使用应用程序中定义的统一JWT密钥
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key'; // 与app.js保持一致
 
 /**
  * 用户认证中间件 - 验证用户令牌
@@ -228,7 +228,7 @@ router.get('/review', async (req, res) => {
  * @param {object} req.body - 评价数据
  * @returns {object} 提交结果
  */
-router.post('/review', authMiddleware, async (req, res) => {
+router.post('/review', async (req, res) => {
   try {
     const { username, rating, comment } = req.body;
     

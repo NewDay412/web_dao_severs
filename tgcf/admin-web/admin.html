@@ -60,7 +60,12 @@
         const currentHost = window.location.hostname;
         const currentProtocol = window.location.protocol;
         
-        // 根据域名选择对应的API地址
+        // 本地开发环境
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+          return 'http://localhost:3003/api';
+        }
+        
+        // 生产环境 - 根据域名选择对应的API地址
         if (currentHost === 'longlong.baby' || currentHost === 'www.longlong.baby') {
           return 'https://longlong.baby/api';
         } else if (currentHost === 'dao.longlong.baby') {
@@ -69,8 +74,42 @@
           return `${currentProtocol}//47.83.203.60/api`;
         }
         
-        // 默认使用本地开发环境
+        // 默认使用相对路径
         return '/api';
+      }
+
+      /**
+       * 修复图片URL
+       * 根据当前环境正确处理图片路径
+       */
+      function fixImageUrl(url) {
+        if (!url) return url;
+        
+        const currentProtocol = window.location.protocol;
+        const currentHost = window.location.hostname;
+        
+        // 本地开发环境处理
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+          if (url.startsWith('/uploads/') || url.includes('/uploads/')) {
+            const fileName = url.split('/uploads/').pop();
+            return `http://localhost:3003/node-backend/uploads/${fileName}`;
+          }
+          if (url.startsWith('http://localhost:3003/')) {
+            return url;
+          }
+        }
+        
+        // 生产环境处理
+        else {
+          if (url.startsWith('/uploads/') || url.includes('/uploads/')) {
+            const apiBaseUrl = getApiBaseUrl().replace('/api', '');
+            const fileName = url.split('/uploads/').pop();
+            return `${apiBaseUrl}/node-backend/uploads/${fileName}`;
+          }
+          return url;
+        }
+        
+        return url;
       }
 
       /**
@@ -235,6 +274,48 @@
         width: 24px;
         text-align: center;
         font-size: 1.2rem;
+      }
+
+      /* 上传进度条样式 */
+      .upload-progress {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        z-index: 9999;
+        min-width: 300px;
+        text-align: center;
+      }
+      
+      .progress-bar-container {
+        width: 100%;
+        height: 8px;
+        background: #f0f0f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 15px 0;
+      }
+      
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #9e2a2b 0%, #daa520 100%);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+        width: 0%;
+      }
+      
+      .upload-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9998;
       }
 
       /* 主内容区 */
@@ -942,6 +1023,57 @@
     </style>
   </head>
   <body>
+    <!-- 添加密码修改模态框 -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="changePasswordModalLabel">修改管理员密码</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="changePasswordAdminId">
+            
+            <div class="mb-3">
+              <label for="currentPassword" class="form-label">当前密码</label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="currentPassword" placeholder="请输入当前密码" required>
+                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('currentPassword')">
+                  <i class="bi bi-eye" id="currentPassword-eye"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="newPassword" class="form-label">新密码</label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="newPassword" placeholder="请输入新密码" required>
+                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('newPassword')">
+                  <i class="bi bi-eye" id="newPassword-eye"></i>
+                </button>
+              </div>
+              <div class="mt-1" id="passwordStrength"></div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">确认新密码</label>
+              <div class="input-group">
+                <input type="password" class="form-control" id="confirmPassword" placeholder="请再次输入新密码" required>
+                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirmPassword')">
+                  <i class="bi bi-eye" id="confirmPassword-eye"></i>
+                </button>
+              </div>
+              <div class="mt-1" id="passwordMatch" style="display: none;"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary" onclick="confirmChangePassword()">确认修改</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <nav class="navbar navbar-expand-lg fixed-top navbar-responsive">
       <div class="container-fluid container-fluid-responsive">
         <button class="mobile-menu-btn" onclick="toggleSidebar()">
@@ -953,13 +1085,24 @@
           <span class="d-inline d-sm-none">管理系统</span>
         </a>
         <div class="d-flex align-items-center">
-          <span class="text-white me-2 d-none d-md-inline" id="adminWelcome"
+          <span class="text-white me-3 d-none d-md-inline" id="adminWelcome"
             >管理员</span
           >
-          <button class="btn btn-outline-light btn-sm" onclick="logout()">
-            <i class="bi bi-box-arrow-right"></i>
-            <span class="d-none d-sm-inline">退出</span>
-          </button>
+          <div class="dropdown me-2">
+            <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i>
+              <span class="d-none d-sm-inline">账户</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" onclick="changePassword()">
+                <i class="bi bi-key me-2"></i>修改密码
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>退出登录
+              </a></li>
+            </ul>
+          </div>
         </div>
       </div>
     </nav>
@@ -1011,6 +1154,10 @@
         <a href="#" class="sidebar-link" onclick="switchPage('admins')">
           <i class="bi bi-person-gear"></i>
           <span>管理员管理</span>
+        </a>
+        <a href="#" class="sidebar-link" onclick="changePassword()">
+          <i class="bi bi-key"></i>
+          <span>修改密码</span>
         </a>
       </div>
     </div>
@@ -1359,7 +1506,8 @@
           contentHtml += `<div class="message-text">${message.content}</div>`;
         }
         if (message.image_url) {
-          contentHtml += `<img src="${message.image_url}" class="message-image" style="max-width:200px; border-radius:6px; margin-top:5px;" onclick="showImageModal('${message.image_url}')">`;
+          const fixedImageUrl = fixImageUrl(message.image_url);
+          contentHtml += `<img src="${fixedImageUrl}" class="message-image" style="max-width:200px; border-radius:6px; margin-top:5px;" onclick="showImageModal('${fixedImageUrl}')">`;
         }
         if (message.video_url) {
           contentHtml += `<video controls class="message-video" style="max-width:200px; border-radius:6px; margin-top:5px;"><source src="${message.video_url}"></video>`;
@@ -2195,8 +2343,9 @@
         }
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin-chat/messages/${username}`,
+            `${apiBaseUrl}/admin-chat/messages/${username}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
@@ -2236,8 +2385,8 @@
                             <div class="d-inline-block p-2 rounded ${msg.sender_name === "admin" ? "text-white" : "bg-light"}" style="max-width: 70%; background-color: ${msg.sender_name === "admin" ? "#B87333" : "#f8f9fa"};">
                                 <small class="d-block fw-bold">${msg.sender_name === "admin" ? "管理员" : msg.sender_name}</small>
                                 ${msg.content || ""}
-                                ${msg.image_url ? `<img src="${msg.image_url}" class="img-fluid mt-1" style="max-width: 150px; border-radius: 4px;">` : ""}
-                                ${msg.video_url ? `<video controls class="mt-1" style="max-width: 150px;"><source src="${msg.video_url}"></video>` : ""}
+                                ${msg.image_url ? `<img src="${fixImageUrl(msg.image_url)}" class="img-fluid mt-1" style="max-width: 150px; border-radius: 4px;">` : ""}
+                                ${msg.video_url ? `<video controls class="mt-1" style="max-width: 150px;"><source src="${fixImageUrl(msg.video_url)}"></video>` : ""}
                                 <small class="d-block text-muted mt-1">${new Date(msg.create_time).toLocaleString()}</small>
                             </div>
                         </div>
@@ -2270,8 +2419,9 @@
         if (!content) return;
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            "/api/admin-chat/send",
+            `${apiBaseUrl}/admin-chat/send`,
             {
               method: "POST",
               headers: {
@@ -2316,8 +2466,9 @@
       
       async function loadAllMessages() {
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            "/api/admin-chat/messages",
+            `${apiBaseUrl}/admin-chat/messages`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
@@ -2355,8 +2506,8 @@
                             <div class="d-inline-block p-2 rounded ${msg.sender_name === "admin" ? "text-white" : "bg-light"}" style="max-width: 70%; background-color: ${msg.sender_name === "admin" ? "#B87333" : "#f8f9fa"};">
                                 <small class="d-block fw-bold">${msg.sender_name === "admin" ? "管理员" : msg.sender_name}</small>
                                 ${msg.content || ""}
-                                ${msg.image_url ? `<img src="${msg.image_url}" class="img-fluid mt-1" style="max-width: 150px; border-radius: 4px;">` : ""}
-                                ${msg.video_url ? `<video controls class="mt-1" style="max-width: 150px;"><source src="${msg.video_url}"></video>` : ""}
+                                ${msg.image_url ? `<img src="${fixImageUrl(msg.image_url)}" class="img-fluid mt-1" style="max-width: 150px; border-radius: 4px;">` : ""}
+                                ${msg.video_url ? `<video controls class="mt-1" style="max-width: 150px;"><source src="${fixImageUrl(msg.video_url)}"></video>` : ""}
                                 <small class="d-block text-muted mt-1">${new Date(msg.create_time).toLocaleString()}</small>
                             </div>
                         </div>
@@ -2385,8 +2536,9 @@
         if (!content) return;
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            "/api/admin-chat/send",
+            `${apiBaseUrl}/admin-chat/send`,
             {
               method: "POST",
               headers: {
@@ -2446,7 +2598,8 @@
         formData.append('receiver_name', username);
         
         try {
-          const response = await fetch('/api/admin-chat/upload', {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/admin-chat/upload`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
@@ -2490,7 +2643,8 @@
         }
         
         try {
-          const response = await fetch('/api/admin/admin', {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/admin/admin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -2532,21 +2686,367 @@
         }
       }
 
-      function changeAdminPassword(id) {
-        const newPassword = prompt('请输入新密码（不少于6位）:');
-        if (!newPassword) return;
+      // 修改当前用户密码 - 使用模态框
+      function changePassword() {
+        // 清空管理员ID（表示修改当前用户密码）
+        document.getElementById('changePasswordAdminId').value = '';
         
-        if (newPassword.length < 6) {
-          alert('密码长度不能少于6位');
+        // 重置表单
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        document.getElementById('passwordStrength').innerHTML = '';
+        document.getElementById('passwordMatch').style.display = 'none';
+        
+        // 恢复模态框标题
+        document.getElementById('changePasswordModalLabel').textContent = '修改管理员密码';
+        
+        // 显示当前密码字段
+        const currentPasswordGroup = document.getElementById('currentPassword').closest('.mb-3');
+        currentPasswordGroup.style.display = 'block';
+        
+        // 显示模态框
+        const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+        modal.show();
+      }
+      
+      // 确认修改密码
+      async function confirmChangePassword() {
+        const adminId = document.getElementById('changePasswordAdminId').value;
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // 表单验证
+        if (!adminId && !currentPassword) {
+          alert('请输入当前密码');
           return;
         }
         
-        updateAdminPassword(id, newPassword);
+        if (!newPassword) {
+          alert('请输入新密码');
+          return;
+        }
+        
+        // 密码强度检查
+        const strength = checkPasswordStrength(newPassword);
+        if (strength < 2) {
+          alert('密码强度不足，请使用更复杂的密码');
+          return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+          alert('两次输入的新密码不一致');
+          return;
+        }
+        
+        try {
+          const apiBaseUrl = getApiBaseUrl();
+          let response;
+          
+          if (adminId) {
+            // 修改其他管理员密码
+            response = await fetch(`${apiBaseUrl}/admin/admin/${adminId}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+              },
+              body: JSON.stringify({
+                password: newPassword
+              })
+            });
+          } else {
+            // 修改当前用户密码
+            response = await fetch(`${apiBaseUrl}/admin/update-password`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+              },
+              body: JSON.stringify({
+                currentPassword: currentPassword,
+                newPassword: newPassword
+              })
+            });
+          }
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            // 关闭模态框
+            bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+            
+            if (adminId) {
+              // 修改其他管理员密码成功
+              alert('管理员密码修改成功');
+              loadPageData(currentPage); // 刷新页面数据
+            } else {
+              // 修改当前用户密码成功
+              alert('密码修改成功，请重新登录');
+              // 清除登录信息并跳转到登录页面
+              localStorage.removeItem('admin_token');
+              localStorage.removeItem('admin_user');
+              localStorage.removeItem('admin_role');
+              window.location.href = '../user-web/登录页面.html';
+            }
+          } else {
+            alert('密码修改失败: ' + (result.error || result.message || '未知错误'));
+          }
+        } catch (error) {
+          console.error('修改密码失败:', error);
+          alert('修改密码失败: ' + error.message);
+        }
+      }
+      
+      // 检查密码强度
+      function checkPasswordStrength(password) {
+        let strength = 0;
+        const strengthEl = document.getElementById('passwordStrength');
+        
+        // 重置强度显示
+        strengthEl.innerHTML = '';
+        
+        if (password.length < 6) {
+          strengthEl.innerHTML = '<span class="text-danger">密码长度至少6位</span>';
+          return 0;
+        }
+        
+        // 长度检查
+        if (password.length >= 8) strength++;
+        
+        // 复杂度检查
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        
+        // 显示强度
+        let strengthText = '';
+        let strengthColor = '';
+        
+        if (strength <= 2) {
+          strengthText = '弱';
+          strengthColor = 'text-danger';
+        } else if (strength <= 4) {
+          strengthText = '中';
+          strengthColor = 'text-warning';
+        } else {
+          strengthText = '强';
+          strengthColor = 'text-success';
+        }
+        
+        strengthEl.innerHTML = `<span class="${strengthColor}">密码强度: ${strengthText}</span>`;
+        return strength;
+      }
+      
+      // 监听密码输入，实时检查密码强度
+      function setupPasswordListeners() {
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const passwordMatch = document.getElementById('passwordMatch');
+        
+        if (newPassword) {
+          newPassword.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            
+            // 检查密码是否匹配
+            if (confirmPassword.value) {
+              checkPasswordMatch();
+            }
+          });
+        }
+        
+        if (confirmPassword) {
+          confirmPassword.addEventListener('input', checkPasswordMatch);
+        }
+      }
+      
+      // 检查两次输入的密码是否匹配
+      function checkPasswordMatch() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordMatch = document.getElementById('passwordMatch');
+        
+        if (!newPassword || !confirmPassword) {
+          passwordMatch.style.display = 'none';
+          return;
+        }
+        
+        passwordMatch.style.display = 'block';
+        
+        if (newPassword === confirmPassword) {
+          passwordMatch.innerHTML = '<span class="text-success">✓ 密码匹配</span>';
+          return true;
+        } else {
+          passwordMatch.innerHTML = '<span class="text-danger">✗ 密码不匹配</span>';
+          return false;
+        }
+      }
+      
+      // 在DOM加载完成后设置监听
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupPasswordListeners);
+      } else {
+        setupPasswordListeners();
+      }
+      
+      // 修改其他管理员密码 - 使用统一的密码修改表单
+      function changeAdminPassword(id) {
+        // 设置管理员ID到隐藏字段
+        document.getElementById('changePasswordAdminId').value = id;
+        
+        // 重置表单
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        document.getElementById('passwordStrength').innerHTML = '';
+        document.getElementById('passwordMatch').style.display = 'none';
+        
+        // 修改模态框标题为管理员密码修改
+        document.getElementById('changePasswordModalLabel').textContent = '修改管理员密码';
+        
+        // 隐藏当前密码字段（管理员修改其他管理员密码不需要输入当前密码）
+        const currentPasswordGroup = document.getElementById('currentPassword').closest('.mb-3');
+        currentPasswordGroup.style.display = 'none';
+        
+        // 显示模态框
+        const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+        modal.show();
+      }
+
+      
+      // 编辑管理员信息
+      async function editAdmin(id) {
+        try {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/admin/admin/${id}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+            }
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            showEditAdminModal(result.data, id);
+          } else {
+            alert('获取管理员信息失败: ' + result.error);
+          }
+        } catch (error) {
+          console.error('获取管理员信息失败:', error);
+          alert('获取管理员信息失败: ' + error.message);
+        }
+      }
+      
+      // 显示编辑管理员模态框
+      function showEditAdminModal(admin, id) {
+        const existingModal = document.getElementById('editAdminModal');
+        if (existingModal) {
+          existingModal.remove();
+        }
+        
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+          <div class="modal fade" id="editAdminModal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white;">
+                  <h5 class="modal-title">
+                    <i class="bi bi-pencil-square me-2"></i>编辑管理员
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="editAdminForm">
+                    <div class="mb-3">
+                      <label class="form-label">
+                        <i class="bi bi-person me-1"></i>管理员名 *
+                      </label>
+                      <input type="text" class="form-control" id="editAdminUsername" value="${admin.username}" required>
+                      <div class="form-text">用于登录的用户名，3-50个字符</div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">
+                        <i class="bi bi-shield-check me-1"></i>管理员类型
+                      </label>
+                      <select class="form-control" id="editAdminRole">
+                        <option value="admin" ${admin.role === 'admin' ? 'selected' : ''}>普通管理员</option>
+                        <option value="super_admin" ${admin.role === 'super_admin' ? 'selected' : ''}>超级管理员</option>
+                      </select>
+                    </div>
+                    <div class="alert alert-info">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <strong>提示：</strong>如需修改密码，请使用“改密码”按钮。
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>取消
+                  </button>
+                  <button type="button" class="btn btn-primary" onclick="updateAdminInfo(${id})">
+                    <i class="bi bi-check-lg me-1"></i>保存修改
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        const modalEl = new bootstrap.Modal(document.getElementById('editAdminModal'));
+        modalEl.show();
+      }
+      
+      // 更新管理员信息
+      async function updateAdminInfo(id) {
+        const username = document.getElementById('editAdminUsername').value;
+        const role = document.getElementById('editAdminRole').value;
+        
+        if (!username) {
+          alert('请输入管理员名');
+          return;
+        }
+        
+        if (username.length < 3 || username.length > 50) {
+          alert('管理员名长度必须在3-50个字符之间');
+          return;
+        }
+        
+        try {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/admin/admin/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+            },
+            body: JSON.stringify({
+              username: username,
+              role: role
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            bootstrap.Modal.getInstance(document.getElementById('editAdminModal')).hide();
+            loadPageData(currentPage);
+            alert('管理员信息更新成功');
+          } else {
+            alert('更新失败: ' + result.error);
+          }
+        } catch (error) {
+          console.error('更新管理员信息失败:', error);
+          alert('更新失败: ' + error.message);
+        }
       }
       
       async function updateAdminPassword(id, newPassword) {
         try {
-          const response = await fetch(`/api/admin/admin/${id}`, {
+          const apiBaseUrl = getApiBaseUrl();
+          const response = await fetch(`${apiBaseUrl}/admin/admin/${id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -2677,7 +3177,8 @@
                         <td>${item.role === "super_admin" ? "超级管理员" : "管理员"}</td>
                         <td>${formatDate(item.create_time)}</td>
                         <td>
-                            <button class="btn btn-sm btn-warning" onclick="changePassword(${item.id})">修改密码</button>
+                            <button class="btn btn-sm btn-info" onclick="editAdmin(${item.id})">编辑</button>
+                            <button class="btn btn-sm btn-warning" onclick="changeAdminPassword(${item.id})">改密码</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id}, 'admins')">删除</button>
                         </td>
                     `;
@@ -2699,7 +3200,7 @@
                         <td><input type="checkbox" class="item-checkbox" value="${item.id}" onchange="updateDeleteButton()"></td>
                         <td>${item.id}</td>
                         <td>${item.title}</td>
-                        <td><img src="${item.image_url}" alt="轮播图" style="width: 60px; height: 40px; object-fit: cover;"></td>
+                        <td><img src="${fixImageUrl(item.image_url)}" alt="轮播图" style="width: 60px; height: 40px; object-fit: cover;"></td>
                         <td><span class="badge ${item.is_active ? 'bg-success' : 'bg-secondary'}">${item.is_active ? '启用' : '禁用'}</span></td>
                         <td>${formatDate(item.create_time)}</td>
                         <td>
@@ -2832,7 +3333,7 @@
                                         </div>
                                         <div class="alert alert-info">
                                             <i class="bi bi-info-circle me-2"></i>
-                                            <strong>提示：</strong>首页内容将在网站首页展示，请确保内容准确且吸引人。
+                                            <strong>提示：</strong>首页内容将在网站首页展示，但只展示前三条，请确保内容准确且吸引人。
                                         </div>
                                     </form>
                                 </div>
@@ -3443,6 +3944,78 @@
                         </div>
                     </div>
                 `;
+        } else if (currentPage === "story") {
+          modal.innerHTML = `
+                    <div class="modal fade" id="addModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white;">
+                                    <h5 class="modal-title">
+                                        <i class="bi bi-book me-2"></i>添加剧情简介
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="addStoryForm">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        <i class="bi bi-card-text me-1"></i>章节标题 *
+                                                    </label>
+                                                    <input type="text" class="form-control" id="addTitle" required placeholder="例如：第1章 神武大街">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        <i class="bi bi-hash me-1"></i>章节编号
+                                                    </label>
+                                                    <input type="number" class="form-control" id="addChapterNumber" value="0" min="0">
+                                                    <div class="form-text">章节序号，0表示序章</div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        <i class="bi bi-sort-numeric-down me-1"></i>显示顺序
+                                                    </label>
+                                                    <input type="number" class="form-control" id="addDisplayOrder" value="1" min="1">
+                                                    <div class="form-text">数字越小显示越靠前</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        <i class="bi bi-chat-text me-1"></i>剧情简介 *
+                                                    </label>
+                                                    <textarea class="form-control" id="addContent" rows="8" required placeholder="请输入本章节的剧情简介"></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">
+                                                        <i class="bi bi-toggle-on me-1"></i>发布状态
+                                                    </label>
+                                                    <select class="form-control" id="addStatus">
+                                                        <option value="published">✅ 已发布</option>
+                                                        <option value="draft">📝 草稿</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            <strong>提示：</strong>剧情简介将在前台页面中展示，请确保内容准确且符合章节顺序。
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="bi bi-x-lg me-1"></i>取消
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="addItem()">
+                                        <i class="bi bi-check-lg me-1"></i>保存简介
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
         } else if (currentPage === "messages") {
           modal.innerHTML = `
                     <div class="modal fade" id="addModal" tabindex="-1">
@@ -3681,6 +4254,7 @@
         }
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const data = {
             label: title,
             value: content,
@@ -3688,7 +4262,7 @@
           };
 
           const response = await fetch(
-            "/api/admin/basic-info",
+            `${apiBaseUrl}/admin/basic-info`,
             {
               method: "POST",
               headers: {
@@ -3735,6 +4309,7 @@
         }
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           let apiUrl = "";
           let data = {};
 
@@ -3743,7 +4318,7 @@
             const linkUrlInput = document.getElementById("addLinkUrl");
             const displayOrderInput = document.getElementById("addDisplayOrder");
             
-            apiUrl = "/api/admin/home-content";
+            apiUrl = `${apiBaseUrl}/admin/home-content`;
             data = {
               title,
               content,
@@ -3765,7 +4340,7 @@
               return;
             }
 
-            apiUrl = "/api/admin/character";
+            apiUrl = `${apiBaseUrl}/admin/character`;
             data = {
               name: title,
               description: content,
@@ -3779,11 +4354,11 @@
             const chapterNumberInput = document.getElementById("addChapterNumber");
             const displayOrderInput = document.getElementById("addDisplayOrder");
             
-            apiUrl = "/api/admin/story-intro";
+            apiUrl = `${apiBaseUrl}/admin/story-intro`;
             data = {
               title,
               content,
-              chapter_number: chapterNumberInput ? chapterNumberInput.value : "",
+              chapter_number: chapterNumberInput ? parseInt(chapterNumberInput.value) || 0 : 0,
               display_order: displayOrderInput ? parseInt(displayOrderInput.value) || 1 : 1,
               status
             };
@@ -3798,7 +4373,7 @@
               tags.push(input.value);
             });
 
-            apiUrl = "/api/admin/work-review";
+            apiUrl = `${apiBaseUrl}/admin/work-review`;
             data = {
               username: title,
               content: content,
@@ -3812,7 +4387,7 @@
             const phoneInput = document.getElementById("addPhone");
             const replyInput = document.getElementById("addReply");
             
-            apiUrl = "/api/admin/message";
+            apiUrl = `${apiBaseUrl}/admin/message`;
             data = {
               username: title,
               content: content,
@@ -3825,7 +4400,7 @@
             const imageInput = document.getElementById("addImage");
             const image = imageInput ? imageInput.value : "";
 
-            apiUrl = "/api/admin/quotes";
+            apiUrl = `${apiBaseUrl}/admin/quotes`;
             data = {
               character_name: title,
               content: content,
@@ -3839,14 +4414,14 @@
               ? displayOrderInput.value
               : "0";
 
-            apiUrl = "/api/admin/basic-info";
+            apiUrl = `${apiBaseUrl}/admin/basic-info`;
             data = {
               label: title,
               value: content,
               display_order: parseInt(displayOrder) || 0,
             };
           } else {
-            apiUrl = "/api/admin/home-content";
+            apiUrl = `${apiBaseUrl}/admin/home-content`;
             data = { title, content, status };
           }
 
@@ -3877,19 +4452,20 @@
 
       async function editItem(id) {
         try {
+          const apiBaseUrl = getApiBaseUrl();
           let apiUrl = "";
           if (currentPage === "characters") {
-            apiUrl = `/api/admin/character/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/character/${id}`;
           } else if (currentPage === "story") {
-            apiUrl = `/api/admin/story-intro/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/story-intro/${id}`;
           } else if (currentPage === "reviews") {
-            apiUrl = `/api/admin/work-review/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/work-review/${id}`;
           } else if (currentPage === "messages") {
-            apiUrl = `/api/admin/message/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/message/${id}`;
           } else if (currentPage === "quotes") {
-            apiUrl = `/api/admin/quotes/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/quotes/${id}`;
           } else {
-            apiUrl = `/api/admin/home-content/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/home-content/${id}`;
           }
 
           const response = await fetch(apiUrl, {
@@ -4033,6 +4609,14 @@
                                             <textarea class="form-control" id="editContent" rows="5">${data.content || ""}</textarea>
                                         </div>
                                         <div class="mb-3">
+                                            <label class="form-label">章节编号</label>
+                                            <input type="number" class="form-control" id="editChapterNumber" value="${data.chapter_number || 0}" min="0">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">显示顺序</label>
+                                            <input type="number" class="form-control" id="editDisplayOrder" value="${data.display_order || 1}" min="1">
+                                        </div>
+                                        <div class="mb-3">
                                             <label class="form-label">状态</label>
                                             <select class="form-control" id="editStatus">
                                                 <option value="published" ${data.status === "published" ? "selected" : ""}>已发布</option>
@@ -4144,6 +4728,7 @@
         }
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           let apiUrl = "";
           let data = {};
 
@@ -4160,7 +4745,7 @@
               return;
             }
 
-            apiUrl = `/api/admin/character/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/character/${id}`;
             data = {
               name: title,
               description: content,
@@ -4171,14 +4756,14 @@
               status,
             };
           } else if (currentPage === "story") {
-            const chapterNumber = document.getElementById("editChapterNumber")?.value || "";
+            const chapterNumber = document.getElementById("editChapterNumber")?.value || 0;
             const displayOrder = document.getElementById("editDisplayOrder")?.value || 1;
             
-            apiUrl = `/api/admin/story-intro/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/story-intro/${id}`;
             data = {
               title,
               content,
-              chapter_number: chapterNumber,
+              chapter_number: parseInt(chapterNumber) || 0,
               display_order: parseInt(displayOrder) || 1,
               status
             };
@@ -4186,7 +4771,7 @@
             const rating = document.getElementById("editRating")?.value || 5;
             const reviewDate = document.getElementById("editReviewDate")?.value || new Date().toISOString().split('T')[0];
             
-            apiUrl = `/api/admin/work-review/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/work-review/${id}`;
             data = {
               username: title,
               content: content,
@@ -4197,7 +4782,7 @@
           } else if (currentPage === "quotes") {
             const image = document.getElementById("editImage").value;
 
-            apiUrl = `/api/admin/quotes/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/quotes/${id}`;
             data = {
               character_name: title,
               content: content,
@@ -4205,7 +4790,7 @@
               status,
             };
           } else {
-            apiUrl = `/api/admin/home-content/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/home-content/${id}`;
             data = { title, content, status };
           }
 
@@ -4238,21 +4823,22 @@
         if (!confirm("确定要删除这条记录吗？")) return;
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           let apiUrl = "";
           if (type === "characters") {
-            apiUrl = `/api/admin/character/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/character/${id}`;
           } else if (type === "story") {
-            apiUrl = `/api/admin/story-intro/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/story-intro/${id}`;
           } else if (type === "reviews") {
-            apiUrl = `/api/admin/work-review/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/work-review/${id}`;
           } else if (type === "message") {
-            apiUrl = `/api/admin/message/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/message/${id}`;
           } else if (type === "quotes") {
-            apiUrl = `/api/admin/quotes/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/quotes/${id}`;
           } else if (type === "Basic_Information") {
-            apiUrl = `/api/admin/basic-info/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/basic-info/${id}`;
           } else {
-            apiUrl = `/api/admin/home-content/${id}`;
+            apiUrl = `${apiBaseUrl}/admin/home-content/${id}`;
           }
 
           const response = await fetch(apiUrl, {
@@ -4287,8 +4873,9 @@
         if (!confirm("确定要发布这条留言吗？")) return;
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin/message/${id}`,
+            `${apiBaseUrl}/admin/message/${id}`,
             {
               method: "PUT",
               headers: {
@@ -4314,8 +4901,9 @@
 
       async function submitReply(id, replyContent) {
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin/message/${id}`,
+            `${apiBaseUrl}/admin/message/${id}`,
             {
               method: "PUT",
               headers: {
@@ -4341,8 +4929,9 @@
 
       async function approveReview(id) {
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin/work-review/${id}/status`,
+            `${apiBaseUrl}/admin/work-review/${id}/status`,
             {
               method: "PUT",
               headers: {
@@ -4370,8 +4959,9 @@
         if (!confirm("确定要拒绝这条评价吗？")) return;
 
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin/work-review/${id}/status`,
+            `${apiBaseUrl}/admin/work-review/${id}/status`,
             {
               method: "PUT",
               headers: {
@@ -4397,8 +4987,9 @@
 
       async function viewReview(id) {
         try {
+          const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `/api/admin/work-review/${id}`,
+            `${apiBaseUrl}/admin/work-review/${id}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("admin_token") || ""}`,
@@ -4635,7 +5226,7 @@
           // 尝试保存到后端
           const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `${apiBaseUrl}/api/admin/site-settings`,
+            `${apiBaseUrl}/admin/site-settings`,
             {
               method: "PUT",
               headers: {
@@ -4666,14 +5257,7 @@
         }
       }
 
-      function changePassword(id) {
-        const newPassword = prompt("请输入新密码:");
-        if (newPassword && newPassword.length >= 6) {
-          alert("修改密码功能开发中...");
-        } else if (newPassword) {
-          alert("密码长度不能少于6位");
-        }
-      }
+
 
       /**
        * 编辑基本信息
@@ -4682,7 +5266,7 @@
         try {
           const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `${apiBaseUrl}/api/admin/basic-info/${id}`,
+            `${apiBaseUrl}/admin/basic-info/${id}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("admin_token") || ""}`,
@@ -4771,7 +5355,7 @@
         try {
           const apiBaseUrl = getApiBaseUrl();
           const response = await fetch(
-            `${apiBaseUrl}/api/admin/basic-info/${id}`,
+            `${apiBaseUrl}/admin/basic-info/${id}`,
             {
               method: "PUT",
               headers: {
@@ -4817,27 +5401,27 @@
 
         for (const id of ids) {
           try {
+            const apiBaseUrl = getApiBaseUrl();
             let apiUrl = "";
             if (currentPage === "characters") {
-              apiUrl = `/api/admin/character/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/character/${id}`;
             } else if (currentPage === "story") {
-              apiUrl = `/api/admin/story-intro/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/story-intro/${id}`;
             } else if (currentPage === "reviews") {
-              apiUrl = `/api/admin/work-review/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/work-review/${id}`;
             } else if (currentPage === "messages") {
-              apiUrl = `/api/admin/message/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/message/${id}`;
             } else if (currentPage === "quotes") {
-              apiUrl = `/api/admin/quotes/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/quotes/${id}`;
             } else if (currentPage === "Basic_Information") {
-              apiUrl = `/api/admin/basic-info/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/basic-info/${id}`;
             } else if (currentPage === "carousel") {
-              apiUrl = `/api/admin/carousel/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/carousel/${id}`;
             } else {
-              apiUrl = `/api/admin/home-content/${id}`;
+              apiUrl = `${apiBaseUrl}/admin/home-content/${id}`;
             }
 
-            const apiBaseUrl = getApiBaseUrl();
-            const response = await fetch(`${apiBaseUrl}${apiUrl}`, {
+            const response = await fetch(apiUrl, {
               method: "DELETE",
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("admin_token") || ""}`,
@@ -4892,7 +5476,7 @@
         
         try {
           const apiBaseUrl = getApiBaseUrl();
-          const response = await fetch(`${apiBaseUrl}/api/admin/carousel`, {
+          const response = await fetch(`${apiBaseUrl}/admin/carousel`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -4926,7 +5510,7 @@
       async function editCarousel(id) {
         try {
           const apiBaseUrl = getApiBaseUrl();
-          const response = await fetch(`${apiBaseUrl}/api/admin/carousel/${id}`, {
+          const response = await fetch(`${apiBaseUrl}/admin/carousel/${id}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
             }
@@ -5064,7 +5648,7 @@
         
         try {
           const apiBaseUrl = getApiBaseUrl();
-          const response = await fetch(`${apiBaseUrl}/api/admin/carousel/${id}`, {
+          const response = await fetch(`${apiBaseUrl}/admin/carousel/${id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -5102,7 +5686,7 @@
         
         try {
           const apiBaseUrl = getApiBaseUrl();
-          const response = await fetch(`${apiBaseUrl}/api/admin/carousel/${id}`, {
+          const response = await fetch(`${apiBaseUrl}/admin/carousel/${id}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
@@ -5124,11 +5708,47 @@
       }
       
       // 图片上传和验证函数
+      function showUploadProgress() {
+        const overlay = document.createElement('div');
+        overlay.className = 'upload-overlay';
+        overlay.id = 'uploadOverlay';
+        
+        const progress = document.createElement('div');
+        progress.className = 'upload-progress';
+        progress.id = 'uploadProgress';
+        progress.innerHTML = `
+          <div style="margin-bottom: 15px;">
+            <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #9e2a2b;"></i>
+          </div>
+          <div style="font-size: 1.1rem; font-weight: 500; margin-bottom: 10px;">正在上传图片...</div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div id="progressText">0%</div>
+        `;
+        
+        document.body.appendChild(overlay);
+        document.body.appendChild(progress);
+      }
+      
+      function hideUploadProgress() {
+        const overlay = document.getElementById('uploadOverlay');
+        const progress = document.getElementById('uploadProgress');
+        if (overlay) overlay.remove();
+        if (progress) progress.remove();
+      }
+      
+      function updateProgress(percent) {
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        if (progressBar) progressBar.style.width = percent + '%';
+        if (progressText) progressText.textContent = Math.round(percent) + '%';
+      }
+
       async function handleImageUpload(fileInput, targetInputId) {
         const file = fileInput.files[0];
         if (!file) return;
         
-        // 验证文件类型
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
           alert('只支持JPG、PNG、GIF、WebP格式的图片');
@@ -5137,11 +5757,12 @@
         
         if (file.size > 5 * 1024 * 1024) {
           alert('图片过大，请上传小于5MB');
-          fileInput.value = ''; // 清空文件选择
+          fileInput.value = '';
           return;
         }
         
-        // 显示上传进度
+        showUploadProgress();
+        
         const targetInput = document.getElementById(targetInputId);
         const originalPlaceholder = targetInput.placeholder;
         targetInput.placeholder = '正在上传...';
@@ -5149,6 +5770,14 @@
         
         const formData = new FormData();
         formData.append('file', file);
+        
+        // 模拟进度
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 15;
+          if (progress > 90) progress = 90;
+          updateProgress(progress);
+        }, 100);
         
         try {
           const response = await fetch('/api/admin/upload-image', {
@@ -5159,30 +5788,37 @@
             body: formData
           });
           
+          clearInterval(progressInterval);
+          updateProgress(100);
+          
           const result = await response.json();
           
-          if (result.success) {
-            targetInput.value = result.data.url;
-            targetInput.classList.remove('is-invalid');
-            targetInput.classList.add('is-valid');
-            updateImagePreview(targetInputId, result.data.url);
-            alert('图片上传成功！');
-          } else {
-            alert('上传失败: ' + result.error);
-          }
+          setTimeout(() => {
+            if (result.success) {
+              targetInput.value = result.data.url;
+              targetInput.classList.remove('is-invalid');
+              targetInput.classList.add('is-valid');
+              updateImagePreview(targetInputId, result.data.url);
+              alert('图片上传成功！');
+            } else {
+              alert('上传失败: ' + result.error);
+            }
+            hideUploadProgress();
+          }, 500);
         } catch (error) {
+          clearInterval(progressInterval);
           console.error('上传图片失败:', error);
-          // 如果后端上传失败，尝试使用本地预览
+          
           const reader = new FileReader();
           reader.onload = function(e) {
             const localUrl = e.target.result;
             targetInput.value = localUrl;
             updateImagePreview(targetInputId, localUrl);
             alert('后端上传失败，已使用本地预览。请手动输入图片地址。');
+            hideUploadProgress();
           };
           reader.readAsDataURL(file);
         } finally {
-          // 恢复输入框状态
           targetInput.placeholder = originalPlaceholder;
           targetInput.disabled = false;
         }
@@ -5274,7 +5910,9 @@
         }
         
         if (previewDiv && previewImg) {
-          previewImg.src = url;
+          // 修复图片URL，确保本地环境使用正确路径
+          const fixedUrl = fixImageUrl(url);
+          previewImg.src = fixedUrl;
           previewImg.onload = () => {
             previewDiv.style.display = 'block';
           };

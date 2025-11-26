@@ -422,7 +422,7 @@ router.post('/story-intro', authMiddleware, asyncHandler(async (req, res) => {
   const validation = validateParams(req.body, {
     title: { required: true, type: 'string', maxLength: 255 },
     content: { required: true, type: 'string' },
-    chapter_number: { type: 'string' },
+    chapter_number: { type: 'number' },
     display_order: { type: 'number' },
     status: { type: 'string' }
   });
@@ -464,7 +464,7 @@ router.put('/story-intro/:id', authMiddleware, asyncHandler(async (req, res) => 
   const validation = validateParams(req.body, {
     title: { type: 'string', maxLength: 255 },
     content: { type: 'string' },
-    chapter_number: { type: 'string' },
+    chapter_number: { type: 'number' },
     display_order: { type: 'number' },
     status: { type: 'string' }
   });
@@ -1021,6 +1021,52 @@ router.delete('/admin/:id', authMiddleware, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * 修改管理员密码
+ * @route POST /api/admin/update-password
+ * @param {string} req.body.currentPassword - 当前密码
+ * @param {string} req.body.newPassword - 新密码
+ * @returns {object} 修改结果
+ */
+router.post('/update-password', authMiddleware, asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  // 验证请求参数
+  const validation = validateParams(req.body, {
+    currentPassword: { required: true, type: 'string', minLength: 1 },
+    newPassword: { required: true, type: 'string', minLength: 6 }
+  });
+  
+  if (!validation.valid) {
+    return validationErrorResponse(res, validation.errors);
+  }
+  
+  try {
+    // 获取当前管理员信息
+    const { username } = req.admin;
+    
+    // 验证当前密码
+    const isValidPassword = await AdminModel.verifyPassword(username, currentPassword);
+    if (!isValidPassword) {
+      return errorResponse(res, '当前密码错误', 400);
+    }
+    
+    // 获取管理员ID
+    const adminInfo = await AdminModel.getAdminByUsername(username);
+    if (!adminInfo) {
+      return errorResponse(res, '管理员不存在', 404);
+    }
+    
+    // 更新密码
+    await AdminModel.updateAdmin(adminInfo.id, { password: newPassword });
+    
+    return successResponse(res, null, '密码修改成功');
+  } catch (error) {
+    console.error('修改密码失败:', error);
+    return errorResponse(res, '密码修改失败', 500);
+  }
+}));
+
+/**
  * 批量删除接口
  * @route DELETE /api/admin/batch-delete
  * @param {string} req.body.type - 删除类型 (home-content|character|story-intro|review|message)
@@ -1499,7 +1545,10 @@ router.post('/upload-image', authMiddleware, (req, res, next) => {
       return errorResponse(res, '请选择要上传的图片', 400);
     }
     
-    const fileUrl = `/uploads/${req.file.filename}`;
+    // 动态生成图片URL，根据请求协议自动选择HTTP或HTTPS
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3003';
+    const fileUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
     
     return successResponse(res, { 
       url: fileUrl,

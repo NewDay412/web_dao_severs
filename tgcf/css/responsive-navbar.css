@@ -1,115 +1,195 @@
-/* 导航栏响应式样式修复 */
-:root {
-    --primary-red: #9e2a2b;
-    --primary-gold: #f9d71c;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
-    --border-light: rgba(255, 255, 255, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+/**
+ * 天官赐福项目 - 响应式导航栏样式
+ * 确保导航栏切换功能的流畅动画和正确显示
+ */
+
+/* 导航栏基础样式 */
+.navbar-collapse {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
 }
 
-/* 导航栏容器 */
-.navbar-container {
-    background: linear-gradient(135deg, var(--primary-red) 0%, #b83234 100%);
-    padding: 0 20px;
-    box-shadow: 0 4px 20px rgba(158, 42, 43, 0.3);
-    position: relative;
-}
-
-.navbar-container::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
-}
-
-.navbar {
-    max-width: 1400px;
-    margin: 0 auto;
-    height: 80px;
-}
-
-/* 导航链接样式 */
-.navbar-nav .nav-link {
-    color: #FFFFFF !important;
-    font-size: 16px;
-    padding: 8px 20px !important;
-    position: relative;
-    border-radius: 20px;
-    margin: 0 5px;
-    transition: all 0.3s ease;
-    background: transparent;
-    border: 1px solid transparent;
-}
-
-.navbar-nav .nav-link:hover {
-    background: rgba(249, 215, 28, 0.1);
-    border-color: rgba(249, 215, 28, 0.3);
-    color: var(--primary-gold) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(249, 215, 28, 0.2);
-}
-
-.navbar-nav .nav-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 15px;
-    right: 15px;
-    background: linear-gradient(90deg, var(--primary-gold), #ffeb3b);
-    transition: width 0.3s ease;
-    border-radius: 1px;
-}
-
-.navbar-nav .nav-link:hover::after {
-    width: calc(100% - 30px);
-}
-
-/* 响应式布局修复 */
+/* 移动端导航栏展开状态 */
 @media (max-width: 991.98px) {
     .navbar-collapse {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    
+    .navbar-collapse.show {
         max-height: 70vh;
-        overflow-y: auto;
-        background-color: var(--primary-red);
-        padding: 15px;
-        border-radius: 0 0 8px 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        opacity: 1;
+        transform: translateY(0);
     }
     
-    .nav-item {
-        margin: 5px 0;
-    }
-    
-    .nav-link {
-        padding: 10px 15px !important;
-        border-radius: 4px;
-        text-align: center;
-    }
-    
-    .navbar-toggler {
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        padding: 6px 10px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.1);
+    .navbar-collapse.collapsing {
+        max-height: 70vh;
+        opacity: 0.5;
+        transform: translateY(-5px);
     }
 }
 
-/* 确保导航栏在移动设备上正常显示 */
-.navbar-responsive {
+/* 导航栏切换按钮状态 */
+.navbar-toggler {
+    transition: all 0.3s ease;
     position: relative;
-    z-index: 1030;
+    z-index: 1001;
 }
 
-/* 修复导航栏展开时的滚动问题 */
+.navbar-toggler:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.navbar-toggler.active {
+    transform: rotate(90deg);
+}
+
+/* 导航栏容器点击区域 */
+.navbar-container,
+.navbar {
+    cursor: pointer;
+    position: relative;
+}
+
+@media (min-width: 992px) {
+    .navbar-container,
+    .navbar {
+        cursor: default;
+    }
+}
+
+/* 导航链接保持正常指针 */
+.navbar-nav .nav-link,
+.navbar-toggler,
+.navbar-brand {
+    cursor: pointer;
+    position: relative;
+    z-index: 1002;
+}
+
+/* 确保body在导航栏展开时可以滚动 */
 body.navbar-expanded {
     overflow: auto !important;
     position: relative !important;
+}
+
+/* 移动端导航栏背景 */
+@media (max-width: 991.98px) {
+    .navbar-collapse.show {
+        background-color: inherit;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        margin-top: 10px;
+        padding: 15px;
+    }
+}
+
+/* 导航栏动画关键帧 */
+@keyframes navbarSlideDown {
+    from {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        max-height: 70vh;
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes navbarSlideUp {
+    from {
+        max-height: 70vh;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* 应用动画 */
+.navbar-collapse.show {
+    animation: navbarSlideDown 0.3s ease-out;
+}
+
+.navbar-collapse:not(.show) {
+    animation: navbarSlideUp 0.3s ease-in;
+}
+
+/* 导航栏点击提示（可选） */
+@media (max-width: 991.98px) {
+    .navbar-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.05);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        border-radius: inherit;
+    }
+    
+    .navbar-container:active::after {
+        opacity: 1;
+    }
+}
+
+/* 确保导航链接在移动端正常工作 */
+@media (max-width: 991.98px) {
+    .navbar-nav .nav-link {
+        padding: 12px 15px;
+        margin: 2px 0;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* 修复可能的z-index问题 */
+.navbar-container {
+    position: relative;
+    z-index: 1000;
+}
+
+.navbar-collapse {
+    position: relative;
+    z-index: 999;
+}
+
+/* 响应式断点优化 */
+@media (max-width: 575.98px) {
+    .navbar-collapse.show {
+        max-height: 80vh;
+        padding: 10px;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .navbar-collapse.show {
+        max-height: 85vh;
+        padding: 8px;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
 }

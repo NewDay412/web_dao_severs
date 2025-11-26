@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轮播图URL修复测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-image { max-width: 200px; height: auto; margin: 10px; border: 2px solid #ccc; }
+        .url-display { background: #f5f5f5; padding: 10px; margin: 5px 0; border-radius: 3px; font-family: monospace; word-break: break-all; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>轮播图URL修复测试</h1>
+    
+    <div class="test-section">
+        <h2>测试轮播图URL修复</h2>
+        <p>原始URL: <span class="url-display" id="original-url">https://longlong.baby/uploads/1764128916032-598167322.JPG</span></p>
+        <p>修复后URL: <span class="url-display" id="fixed-url"></span></p>
+        <img id="test-img" src="" class="test-image" alt="测试轮播图">
+        <p>加载状态: <span id="status">准备测试...</span></p>
+        <button onclick="testFix()">开始测试</button>
+    </div>
+    
+    <script>
+        // 复制admin.html中的fixImageUrl函数
+        function fixImageUrl(url) {
+            if (!url) return url;
+            
+            const currentProtocol = window.location.protocol;
+            const currentHost = window.location.hostname;
+            
+            // 本地开发环境处理
+            if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+                // 如果是相对路径的uploads，转换为本地API服务器路径
+                if (url.startsWith('/uploads/') || url.includes('/uploads/')) {
+                    return url.replace(/^.*\/uploads\//, 'http://localhost:3003/uploads/');
+                }
+                // 如果已经是完整的localhost URL，直接返回
+                if (url.startsWith('http://localhost:3003/')) {
+                    return url;
+                }
+            }
+            
+            // 生产环境处理
+            else {
+                // 如果当前页面是HTTPS，将HTTP图片URL转换为HTTPS
+                if (currentProtocol === 'https:' && url.startsWith('http://localhost:3003/')) {
+                    if (currentHost === 'longlong.baby' || currentHost === 'www.longlong.baby') {
+                        return url.replace('http://localhost:3003/', 'https://longlong.baby/');
+                    } else if (currentHost === 'dao.longlong.baby') {
+                        return url.replace('http://localhost:3003/', 'https://dao.longlong.baby/');
+                    }
+                }
+                
+                // 如果是相对路径的uploads，转换为当前域名的路径
+                if (url.startsWith('/uploads/') || url.includes('/uploads/')) {
+                    if (currentProtocol === 'https:') {
+                        return url.replace(/^.*\/uploads\//, 'https://' + currentHost + '/uploads/');
+                    } else {
+                        return url.replace(/^.*\/uploads\//, 'http://' + currentHost + '/uploads/');
+                    }
+                }
+            }
+            
+            return url;
+        }
+        
+        function testFix() {
+            const originalUrl = 'https://longlong.baby/uploads/1764128916032-598167322.JPG';
+            const fixedUrl = fixImageUrl(originalUrl);
+            
+            document.getElementById('original-url').textContent = originalUrl;
+            document.getElementById('fixed-url').textContent = fixedUrl;
+            
+            const img = document.getElementById('test-img');
+            const status = document.getElementById('status');
+            
+            status.textContent = '正在加载...';
+            status.className = '';
+            
+            img.src = fixedUrl;
+            
+            img.onload = function() {
+                status.textContent = '✅ 图片加载成功';
+                status.className = 'success';
+            };
+            
+            img.onerror = function() {
+                status.textContent = '❌ 图片加载失败';
+                status.className = 'error';
+            };
+        }
+    </script>
+</body>
+</html>

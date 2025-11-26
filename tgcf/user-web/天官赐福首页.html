@@ -1991,7 +1991,7 @@
                 <li><a href="#"><img src="../img/轮播4.png" alt="天官赐福图片2" onerror="this.src='https://picsum.photos/seed/tgcf2/800/500';"/></a></li>
                 <li><a href="#"><img src="../img/轮播6.png" alt="天官赐福图片3" onerror="this.src='https://picsum.photos/seed/tgcf3/800/500';"/></a></li>
                 <li><a href="#"><img src="../img/轮播3.png" alt="天官赐福图片4" onerror="this.src='https://picsum.photos/seed/tgcf4/800/500';"/></a></li>
-                <li><a href="#"><img src="../img/轮播1.png" alt="天官赐福图片5" onerror="this.src='https://picsum.photos/seed/tgcf5/800/500';"/></a></li>
+                <li><a href="#"><img src="../img/轮播1.jpg" alt="天官赐福图片5" onerror="this.src='https://picsum.photos/seed/tgcf5/800/500';"/></a></li>
                 <li><a href="#"><img src="../img/轮播9.png" alt="天官赐福图片5" onerror="this.src='https://picsum.photos/seed/tgcf5/800/500';"/></a></li>
 
             </ul>
@@ -2088,7 +2088,7 @@
     <div class="side">
         <div class="one">
             <i class="bi bi-eyeglasses fs-4"></i>
-            <div class="text">观看</div>
+            <div class="text" onclick="window.location.href='tv.longlong.baby'">观看</div>
         </div>
         <div class="two">
             <i class="bi bi-card-checklist fs-4"></i>
@@ -2473,6 +2473,32 @@
 
         // 轮播图逻辑 - 原生JavaScript版本
         document.addEventListener('DOMContentLoaded', function() {
+            /**
+             * 修复图片URL，确保使用HTTPS协议
+             * @param {string} url - 原始图片URL
+             * @returns {string} 修复后的URL
+             */
+            function fixImageUrl(url) {
+                if (!url) return '';
+                
+                // 如果是相对路径，直接返回
+                if (url.startsWith('./') || url.startsWith('../') || url.startsWith('/')) {
+                    return url;
+                }
+                
+                // 如果是HTTP协议，转换为HTTPS
+                if (url.startsWith('http://')) {
+                    return url.replace('http://', 'https://');
+                }
+                
+                // 如果没有协议，添加HTTPS协议
+                if (!url.startsWith('https://') && !url.startsWith('http://')) {
+                    return 'https://' + url;
+                }
+                
+                return url;
+            }
+            
             var left = document.querySelector(".left");
             var right = document.querySelector(".right");
             var box = document.querySelector(".box");
@@ -2537,8 +2563,8 @@
                     // 设置链接
                     a.href = '#'; // 可以根据实际需求设置链接地址
                     
-                    // 设置图片
-                    img.src = item.image_url;
+                    // 设置图片（确保HTTPS协议）
+                    img.src = fixImageUrl(item.image_url);
                     img.alt = item.title;
                     img.title = item.title;
                     img.onerror = "this.src='https://picsum.photos/seed/tgcf" + (index + 1) + "/800/500';"; // 添加错误处理
@@ -2679,7 +2705,7 @@
                 item.addEventListener('click', function() {
                     switch(index) {
                     case 0: 
-                        alert('观看功能即将上线');
+                        window.location.href = 'tv.longlong.baby';
                         break;
                     case 1: 
                         history.back();
@@ -2688,7 +2714,7 @@
                         window.location.href = '/user-web/留言板.html';
                         break;
                     case 3: 
-                        alert('客服功能即将上线');
+                        window.location.href = '/user-web/聊天.html';
                         break;
                 }
                 });
@@ -2987,5 +3013,8 @@
                 handleAdminEditMode();
             });
         </script>
+        
+        <!-- 图片URL修复脚本 -->
+        <script src="../fix-image-urls.js"></script>
     </body>
 </html>

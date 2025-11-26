@@ -212,6 +212,9 @@ app.use(morgan('dev')); // 日志中间件
 app.use('/user-web', express.static(path.join(__dirname, '../user-web')));
 app.use('/admin-web', express.static(path.join(__dirname, '../admin-web')));
 app.use('/img', express.static(path.join(__dirname, '../img')));
+// 优先使用node-backend/uploads目录（包含实际文件）
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 其次使用根目录uploads目录（备用）
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 

@@ -53,7 +53,6 @@ class WorkReviewModel {
         username,
         rating,
         content,
-        tags = '',
         status = 'pending'
       } = reviewData;
       
@@ -63,9 +62,9 @@ class WorkReviewModel {
       }
       
       const [result] = await db.execute(
-        `INSERT INTO work_reviews (username, rating, content, tags, status, create_time, update_time)
-         VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
-        [username, rating, content, tags, status]
+        `INSERT INTO work_reviews (username, rating, content, status, create_time, update_time)
+         VALUES (?, ?, ?, ?, NOW(), NOW())`,
+        [username, rating, content, status]
       );
       return result.insertId;
     } catch (error) {

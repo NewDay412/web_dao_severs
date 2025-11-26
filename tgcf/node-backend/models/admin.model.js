@@ -180,6 +180,31 @@ class AdminModel {
       throw error;
     }
   }
+
+  /**
+   * 验证管理员密码
+   * @param {string} username - 管理员用户名
+   * @param {string} password - 密码
+   * @returns {boolean} 密码是否正确
+   */
+  static async verifyPassword(username, password) {
+    try {
+      const [admins] = await db.executeOn('web_admindao',
+        'SELECT password FROM admins WHERE username = ?',
+        [username]
+      );
+      
+      if (admins.length === 0) {
+        return false;
+      }
+      
+      const admin = admins[0];
+      return await bcrypt.compare(password, admin.password);
+    } catch (error) {
+      console.error('验证密码失败:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = AdminModel;

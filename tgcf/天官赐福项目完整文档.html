@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天官赐福 - 项目完整技术文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'SimSun', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            padding: 20px;
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+        
+        .page-break {
+            page-break-after: always;
+        }
+        
+        .cover {
+            text-align: center;
+            padding: 50px 0;
+            border-bottom: 3px solid #8B4513;
+            margin-bottom: 30px;
+        }
+        
+        .cover h1 {
+            color: #8B4513;
+            font-size: 36px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .cover .subtitle {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        
+        .cover .version {
+            color: #999;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+        
+        .toc {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8B4513;
+            margin-bottom: 15px;
+        }
+        
+        .toc ul {
+            list-style: none;
+        }
+        
+        .toc li {
+            margin: 8px 0;
+        }
+        
+        .toc a {
+            color: #333;
+            text-decoration: none;
+            display: block;
+            padding: 5px 10px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .toc a:hover {
+            border-left-color: #8B4513;
+            background: #f0f0f0;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #8B4513;
+            margin: 20px 0 10px 0;
+            font-weight: bold;
+        }
+        
+        h1 {
+            font-size: 24px;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 5px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            border-left: 4px solid #8B4513;
+            padding-left: 10px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            color: #A0522D;
+        }
+        
+        p {
+            margin: 10px 0;
+            text-align: justify;
+            font-size: 14px;
+        }
+        
+        ul, ol {
+            margin: 10px 0 10px 30px;
+        }
+        
+        li {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #d63384;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #8B4513;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .tech-stack {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .feature-title {
+            color: #8B4513;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #0c5460;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            
+            .page-break {
+                page-break-after: always;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 封面页 -->
+    <div class="cover">
+        <h1>天官赐福 - Web项目完整技术文档</h1>
+        <div class="subtitle">项目技术架构、部署指南与使用说明</div>
+        <div class="version">
+            <p>项目版本：v2.1.0 | 文档版本：v1.0.0 | 最后更新：2024年</p>
+        </div>
+    </div>
+
+    <!-- 目录 -->
+    <div class="toc">
+        <h2>目录</h2>
+        <ul>
+            <li><a href="#chapter1">第一章：项目简介</a></li>
+            <li><a href="#chapter2">第二章：系统功能</a></li>
+            <li><a href="#chapter3">第三章：技术架构</a></li>
+            <li><a href="#chapter4">第四章：数据库设计</a></li>
+            <li><a href="#chapter5">第五章：账号与登录管理</a></li>
+            <li><a href="#chapter6">第六章：API接口设计</a></li>
+            <li><a href="#chapter7">第七章：部署指南</a></li>
+            <li><a href="#chapter8">第八章：安全配置</a></li>
+            <li><a href="#chapter9">第九章：故障排除</a></li>
+            <li><a href="#chapter10">第十章：维护与扩展</a></li>
+            <li><a href="#appendix">附录</a></li>
+        </ul>
+    </div>
+
+    <!-- 第一章：项目简介 -->
+    <div class="section" id="chapter1">
+        <h1>第一章：项目简介</h1>
+        
+        <h2>1.1 项目概述</h2>
+        <p>《天官赐福》Web项目是一个基于现代Web技术栈构建的内容管理系统，专门用于展示《天官赐福》相关作品内容。系统采用前后端分离架构，提供完整的用户浏览体验和管理员后台功能。</p>
+        
+        <h2>1.2 设计理念</h2>
+        <ul>
+            <li><strong>分层架构</strong>：前后端分离，职责清晰</li>
+            <li><strong>用户体验</strong>：古风仙侠主题，响应式设计</li>
+            <li><strong>模块化设计</strong>：功能模块独立，便于维护</li>
+            <li><strong>数据驱动</strong>：基于MySQL的完整数据模型</li>
+            <li><strong>扩展性</strong>：预留接口，支持功能扩展</li>
+        </ul>
+        
+        <h2>1.3 核心特性</h2>
+        <div class="feature-card">
+            <div class="feature-title">✅ 完整的用户端浏览体验</div>
+            <p>提供首页展示、角色介绍、剧情简介、留言板、作品评价等完整功能。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-title">✅ 专业的管理后台功能</div>
+            <p>支持内容管理、图片上传、权限管理、操作日志等管理功能。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-title">✅ 响应式设计，多设备适配</div>
+            <p>采用Bootstrap框架，支持桌面端、平板端和移动端访问。</p>
+        </div>
+    </div>
+
+    <!-- 第二章：系统功能 -->
+    <div class="section" id="chapter2">
+        <h1>第二章：系统功能</h1>
+        
+        <h2>2.1 用户端功能模块</h2>
+        
+        <div class="feature-card">
+            <div class="feature-title">首页展示模块</div>
+            <p><strong>功能描述</strong>：展示作品精选内容和导航链接</p>
+            <p><strong>技术实现</strong>：Bootstrap轮播组件 + 响应式布局</p>
+            <p><strong>数据来源</strong>：home_content表</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-title">角色介绍模块</div>
+            <p><strong>功能描述</strong>：展示主要角色信息和图片</p>
+            <p><strong>技术实现</strong>：卡片式布局 + 图片懒加载</p>
+            <p><strong>数据来源</strong>：character_info表</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-title">留言板模块</div>
+            <p><strong>功能描述</strong>：用户留言发布和查看</p>
+            <p><strong>技术实现</strong>：AJAX异步提交 + 实时更新</p>
+            <p><strong>数据来源</strong>：message_board表</p>
+        </div>
+        
+        <h2>2.2 管理端功能模块</h2>
+        
+        <div class="feature-card">
+            <div class="feature-title">内容管理模块</div>
+            <ul>
+                <li><strong>首页内容管理</strong>：配图上传、链接设置、显示顺序</li>
+                <li><strong>角色信息管理</strong>：图片上传、重要性分级、性格描述</li>
+                <li><strong>剧情简介管理</strong>：章节编号、内容排序、发布状态</li>
+                <li><strong>作品评价管理</strong>：五星评分、标签分类、审核状态</li>
+                <li><strong>留言板管理</strong>：用户信息、回复功能、状态控制</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-title">图片上传功能</div>
+            <ul>
+                <li><strong>支持格式</strong>：JPG、PNG、GIF、WebP</li>
+                <li><strong>文件限制</strong>：最大5MB</li>
+                <li><strong>技术特性</strong>：实时预览、格式检查、自动压缩</li>
+                <li><strong>用户体验</strong>：拖拽上传、进度显示</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 第三章：技术架构 -->
+    <div class="section" id="chapter3">
+        <h1>第三章：技术架构</h1>
+        
+        <h2>3.1 技术栈概览</h2>
+        
+        <div class="tech-stack">
+            <h3>后端技术栈</h3>
+            <ul>
+                <li><strong>运行时环境</strong>：Node.js 14.0+</li>
+                <li><strong>Web框架</strong>：Express.js 4.18.2</li>
+                <li><strong>数据库</strong>：MySQL 5.7+</li>
+                <li><strong>数据库驱动</strong>：mysql2 3.6.5</li>
+                <li><strong>安全认证</strong>：JWT (jsonwebtoken 9.0.2)</li>
+                <li><strong>文件上传</strong>：Multer 1.4.5</li>
+            </ul>
+        </div>
+        
+        <div class="tech-stack">
+            <h3>前端技术栈</h3>
+            <ul>
+                <li><strong>HTML/CSS框架</strong>：Bootstrap 5.3.2</li>
+                <li><strong>图标库</strong>：Bootstrap Icons 1.11.1</li>
+                <li><strong>JavaScript库</strong>：jQuery 3.6.0</li>
+                <li><strong>响应式设计</strong>：CSS3媒体查询</li>
+                <li><strong>交互组件</strong>：Bootstrap组件库</li>
+            </ul>
+        </div>
+        
+        <h2>3.2 系统架构图</h2>
+        <pre>
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   用户浏览器    │     │   管理员浏览器   │     │   MySQL数据库   │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   user-web/     │     │   admin-web/    │     │  数据存储层     │
+│   前端用户页面  │     │  管理员后台页面  │     │  (数据库表)     │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └─────────────┬─────────┘                       │
+                       ▼                                 │
+┌─────────────────────────────────────────────────────────┐
+│                     node-backend/                      │
+│                  后端API服务层                           │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐     │
+│  │   API   │  │  配置   │  │  模型   │  │  工具   │     │
+│  │  路由   │  │  管理   │  │  定义   │  │  函数   │     │
+│  └─────────┘  └─────────┘  └─────────┘  └─────────┘     │
+└─────────────────────────────────────────────────────────┘
+        </pre>
+    </div>
+
+    <!-- 第四章：数据库设计 -->
+    <div class="section" id="chapter4">
+        <h1>第四章：数据库设计</h1>
+        
+        <h2>4.1 数据库架构</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>数据库名称</th>
+                    <th>用途</th>
+                    <th>主要表</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>web_project</td>
+                    <td>内容管理</td>
+                    <td>home_content, character_info, story_intro等</td>
+                </tr>
+                <tr>
+                    <td>web_userdao</td>
+                    <td>用户管理</td>
+                    <td>users, user_login_logs, user_collections</td>
+                </tr>
+                <tr>
+                    <td>web_admindao</td>
+                    <td>管理员管理</td>
+                    <td>admins, admin_operation_logs, system_configs</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>4.2 核心表结构示例</h2>
+        
+        <h3>users表（用户信息）</h3>
+        <pre><code>CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL, -- bcrypt加密
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    avatar VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status ENUM('active', 'inactive') DEFAULT 'active'
+);</code></pre>
+    </div>
+
+    <!-- 第五章：账号与登录管理 -->
+    <div class="section" id="chapter5">
+        <h1>第五章：账号与登录管理</h1>
+        
+        <h2>5.1 账号类型</h2>
+        
+        <div class="info-box">
+            <h3>用户账号</h3>
+            <ul>
+                <li><strong>获取方式</strong>：通过系统注册功能完成账号创建</li>
+                <li><strong>注册流程</strong>：填写用户名、密码、邮箱等信息</li>
+                <li><strong>权限范围</strong>：用户端功能访问权限</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>管理员账号</h3>
+            <ul>
+                <li><strong>默认账号</strong>：<code>admin</code></li>
+                <li><strong>初始密码</strong>：<code>admin123</code>（建议首次登录后立即修改）</li>
+                <li><strong>权限范围</strong>：管理后台所有功能权限</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>测试账号</h3>
+            <ul>
+                <li><strong>用户名</strong>：<code>user1</code></li>
+                <li><strong>密码</strong>：<code>password123</code></li>
+                <li><strong>用途</strong>：功能测试和演示</li>
+            </ul>
+        </div>
+        
+        <h2>5.2 登录流程</h2>
+        
+        <h3>用户登录流程</h3>
+        <ol>
+            <li>访问登录页面</li>
+            <li>输入用户名和密码</li>
+            <li>系统验证账号信息</li>
+            <li>验证通过后跳转至用户端首页</li>
+            <li>开始使用系统功能</li>
+        </ol>
+        
+        <h3>管理员登录流程</h3>
+        <ol>
+            <li>访问管理后台登录页面</li>
+            <li>输入管理员账号和密码</li>
+            <li>系统验证管理员权限</li>
+            <li>验证通过后跳转至管理后台</li>
+            <li>开始进行内容管理操作</li>
+        </ol>
+        
+        <div class="warning">
+            <h3>⚠️ 重要安全提示</h3>
+            <ul>
+                <li>生产环境请立即修改默认密码</li>
+                <li>定期更换管理员密码</li>
+                <li>避免使用弱密码</li>
+                <li>启用双因素认证（如支持）</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 第六章：API接口设计 -->
+    <div class="section" id="chapter6">
+        <h1>第六章：API接口设计</h1>
+        
+        <h2>6.1 用户接口 (/api/user)</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>接口</th>
+                    <th>方法</th>
+                    <th>描述</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>/api/user/message</td>
+                    <td>GET</td>
+                    <td>获取留言列表</td>
+                </tr>
+                <tr>
+                    <td>/api/user/message</td>
+                    <td>POST</td>
+                    <td>提交留言</td>
+                </tr>
+                <tr>
+                    <td>/api/user/character</td>
+                    <td>GET</td>
+                    <td>获取角色信息</td>
+                </tr>
+                <tr>
+                    <td>/api/user/reviews</td>
+                    <td>POST</td>
+                    <td>提交作品评价</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>6.2 管理员接口 (/api/admin)</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>接口</th>
+                    <th>方法</th>
+                    <th>描述</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>/api/admin/login</td>
+                    <td>POST</td>
+                    <td>管理员登录</td>
+                </tr>
+                <tr>
+                    <td>/api/admin/character</td>
+                    <td>GET</td>
+                    <td>获取角色管理列表</td>
+                </tr>
+                <tr>
+                    <td>/api/admin/message</td>
+                    <td>PUT</td>
+                    <td>更新留言状态</td>
+                </tr>
+                <tr>
+                    <td>/api/admin/upload-image</td>
+                    <td>POST</td>
+                    <td>上传图片</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第七章：部署指南 -->
+    <div class="section" id="chapter7">
+        <h1>第七章：部署指南</h1>
+        
+        <h2>7.1 环境要求</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>组件</th>
+                    <th>要求</th>
+                    <th>说明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>操作系统</td>
+                    <td>Windows/Linux/macOS</td>
+                    <td>支持主流操作系统</td>
+                </tr>
+                <tr>
+                    <td>Node.js</td>
+                    <td>版本 14.0+</td>
+                    <td>JavaScript运行时环境</td>
+                </tr>
+                <tr>
+                    <td>MySQL</td>
+                    <td>版本 5.7+</td>
+                    <td>数据库服务</td>
+                </tr>
+                <tr>
+                    <td>内存</td>
+                    <td>至少 2GB RAM</td>
+                    <td>运行内存要求</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>7.2 一键部署（推荐）</h2>
+        
+        <ol>
+            <li><strong>下载项目文件</strong>到本地目录</li>
+            <li><strong>安装MySQL</strong>并启动服务</li>
+            <li><strong>运行启动脚本</strong>：<code>start-server.bat</code></li>
+            <li><strong>等待自动安装</strong>依赖和启动服务</li>
+            <li><strong>访问项目</strong>开始使用</li>
+        </ol>
+        
+        <h2>7.3 访问地址</h2>
+        
+        <div class="info-box">
+            <h3>服务地址</h3>
+            <ul>
+                <li><strong>后端API服务</strong>：http://localhost:3003</li>
+                <li><strong>健康检查</strong>：http://localhost:3003/health</li>
+                <li><strong>用户页面</strong>：直接打开HTML文件</li>
+                <li><strong>管理后台</strong>：<code>admin-web/admin.html</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 第八章：安全配置 -->
+    <div class="section" id="chapter8">
+        <h1>第八章：安全配置</h1>
+        
+        <h2>8.1 账号与登录管理</h2>
+        
+        <div class="info-box">
+            <h3>测试账号获取</h3>
+            <ul>
+                <li>用户通过系统注册功能完成账号创建</li>
+                <li>注册成功后可使用该账号密码登录</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>管理员账号信息</h3>
+            <ul>
+                <li>默认账号：<code>admin</code></li>
+                <li>初始密码：<code>admin123</code>（建议首次登录后修改）</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>登录流程</h3>
+            <ul>
+                <li>所有账号均需通过登录页面提交验证</li>
+                <li>验证通过后按权限自动跳转至对应操作界面</li>
+                <li>用户账号跳转至用户端首页</li>
+                <li>管理员账号跳转至管理后台</li>
+            </ul>
+        </div>
+        
+        <h2>8.2 安全特性</h2>
+        
+        <ul>
+            <li><strong>JWT认证</strong>：安全的令牌认证机制</li>
+            <li><strong>密码加密</strong>：bcrypt加密存储</li>
+            <li><strong>SQL注入防护</strong>：参数化查询</li>
+            <li><strong>XSS防护</strong>：输入输出过滤</li>
+            <li><strong>文件安全</strong>：类型验证和大小限制</li>
+        </ul>
+    </div>
+
+    <!-- 第九章：故障排除 -->
+    <div class="section" id="chapter9">
+        <h1>第九章：故障排除</h1>
+        
+        <h2>9.1 常见问题</h2>
+        
+        <div class="feature-card">
+            <div class="feature-title">服务启动失败</div>
+            <p><strong>问题</strong>：端口被占用</p>
+            <p><strong>解决</strong>：</p>
+            <pre><code># 查找占用进程
+lsof -i :3003
+
+# 终止进程
+kill -9 <PID>
+
+# 或使用其他端口
+PORT=3004 npm start</code></pre>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-title">数据库连接失败</div>
+            <p><strong>问题</strong>：密码错误或服务未启动</p>
+            <p><strong>解决</strong>：</p>
+            <pre><code># 检查MySQL服务状态
+sudo systemctl status mysql
+
+# 验证数据库连接
+mysql -u root -p</code></pre>
+        </div>
+        
+        <h2>9.2 诊断工具</h2>
+        
+        <ul>
+            <li><code>check-environment.js</code> - 环境检查脚本</li>
+            <li><code>health-check.js</code> - 健康检查脚本</li>
+            <li><code>test-all-features.js</code> - 全功能测试脚本</li>
+        </ul>
+    </div>
+
+    <!-- 第十章：维护与扩展 -->
+    <div class="section" id="chapter10">
+        <h1>第十章：维护与扩展</h1>
+        
+        <h2>10.1 日常维护</h2>
+        
+        <h3>数据备份</h3>
+        <pre><code># 数据库备份
+mysqldump -u root -p web_project > backup.sql
+
+# 文件备份
+tar -czf backup.tar.gz /var/www/tgcf/</code></pre>
+        
+        <h3>性能监控</h3>
+        <ul>
+            <li>监控服务器资源使用情况</li>
+            <li>监控应用性能指标</li>
+            <li>监控数据库查询性能</li>
+        </ul>
+        
+        <h2>10.2 功能扩展</h2>
+        
+        <h3>新模块添加流程</h3>
+        <ol>
+            <li>在对应目录创建新页面</li>
+            <li>添加API路由和控制器</li>
+            <li>创建数据库表结构</li>
+            <li>测试功能完整性</li>
+        </ol>
+    </div>
+
+    <!-- 附录 -->
+    <div class="section" id="appendix">
+        <h1>附录</h1>
+        
+        <h2>A. 项目文件结构</h2>
+        <pre><code>web_dao/
+├── user-web/           # 前端用户页面
+│   ├── 天官赐福首页.html
+│   ├── 角色介绍.html
+│   ├── 留言板.html
+│   └── ...
+├── admin-web/          # 管理员页面
+│   └── admin.html
+├── node-backend/       # 后端API服务
+│   ├── api/           # 路由文件
+│   ├── config/        # 配置文件
+│   ├── models/        # 数据模型
+│   ├── utils/         # 工具函数
+│   ├── uploads/       # 图片上传目录
+│   └── app.js         # 主应用文件
+├── img/               # 图片资源
+├── css/               # 样式文件
+├── js/                # JavaScript文件
+├── start-server.bat   # 一键启动脚本
+└── README.md          # 项目说明文档</code></pre>
+        
+        <h2>B. 快速开始指南</h2>
+        
+        <div class="info-box">
+            <h3>🎯 新用户指南</h3>
+            <ol>
+                <li><strong>首次部署</strong>：
+                    <pre><code># 1. 检查环境
+node check-environment.js
+
+# 2. 启动项目
+start-server.bat
+
+# 3. 验证部署
+node health-check.js</code></pre>
+                </li>
+                <li><strong>开始使用</strong>：访问用户页面体验功能，登录管理后台进行内容管理</li>
+                <li><strong>获取帮助</strong>：查看相关文档，运行诊断脚本，检查控制台日志</li>
+            </ol>
+        </div>
+        
+        <div class="footer">
+            <p>🎉 <strong>祝你使用愉快！</strong> 如有问题，请查看相关文档或运行诊断脚本获取帮助。</p>
+            <p>文档版本：v1.0.0 | 最后更新：2024年 | 维护团队：开发团队</p>
+        </div>
+    </div>
+</body>
+</html>

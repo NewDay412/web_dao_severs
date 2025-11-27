@@ -280,15 +280,16 @@
             margin: 0;
             padding: 0;
             list-style: none;
-            width: 500%;
+            width: 100%;
             position: relative;
             left: 0;
             top: 0;
+            display: flex;
         }
         
         .pic li {
-            float: left;
-            width: 20%;
+            flex: 0 0 auto;
+            width: 100%;
         }
         
         .pic img {
@@ -1726,58 +1727,52 @@
             console.log('页面初始化完成');
         }
         
-        // 检查并更新导航栏登录状态的函数
+        // 优化的导航栏登录状态更新
         function updateNavbarLoginStatus() {
-            const user = localStorage.getItem('user_user');
-            const adminUser = localStorage.getItem('admin_user');
-            const loginItem = document.getElementById('loginItem');
-            const registerItem = document.getElementById('registerItem');
-            const logoutItem = document.getElementById('logoutItem');
-            const userInfoItem = document.getElementById('userInfoItem');
-            const welcomeText = document.getElementById('welcomeText');
+            const elements = {
+                login: document.getElementById('loginItem'),
+                register: document.getElementById('registerItem'),
+                logout: document.getElementById('logoutItem'),
+                userInfo: document.getElementById('userInfoItem'),
+                welcome: document.getElementById('welcomeText')
+            };
             
             try {
-                // 检查是否有用户登录（普通用户或管理员）
-                const loggedInUser = user && user !== 'undefined' && user !== 'null' ? 
-                    JSON.parse(user) : 
-                    (adminUser && adminUser !== 'undefined' && adminUser !== 'null' ? 
-                     JSON.parse(adminUser) : null);
+                const user = localStorage.getItem('user_user');
+                const adminUser = localStorage.getItem('admin_user');
+                const loggedInUser = [user, adminUser]
+                    .find(u => u && u !== 'undefined' && u !== 'null');
                 
-                if (loggedInUser) {
-                    // 用户已登录，显示  退出按钮和欢迎信息
-                    if (loginItem) loginItem.style.display = 'none';
-                    if (registerItem) registerItem.style.display = 'none';
-                    if (logoutItem) logoutItem.style.display = 'block';
-                    if (userInfoItem) userInfoItem.style.display = 'block';
-                    if (welcomeText) welcomeText.textContent = `欢迎 ${loggedInUser.username || '用户'}`;
-                } else {
-                    // 用户未登录，显示登录和注册按钮
-                    if (loginItem) loginItem.style.display = 'block';
-                    if (registerItem) registerItem.style.display = 'block';
-                    if (logoutItem) logoutItem.style.display = 'none';
-                    if (userInfoItem) userInfoItem.style.display = 'none';
-                }
+                const isLoggedIn = !!loggedInUser;
+                const userData = isLoggedIn ? JSON.parse(loggedInUser) : null;
+                
+                // 统一设置显示状态
+                elements.login && (elements.login.style.display = isLoggedIn ? 'none' : 'block');
+                elements.register && (elements.register.style.display = isLoggedIn ? 'none' : 'block');
+                elements.logout && (elements.logout.style.display = isLoggedIn ? 'block' : 'none');
+                elements.userInfo && (elements.userInfo.style.display = isLoggedIn ? 'block' : 'none');
+                elements.welcome && isLoggedIn && (elements.welcome.textContent = `欢迎 ${userData?.username || '用户'}`);
+                
             } catch (e) {
-                console.error('更新导航栏登录状态时出错:', e);
-                // 出错时默认显示登录和注册按钮
-                if (loginItem) loginItem.style.display = 'block';
-                if (registerItem) registerItem.style.display = 'block';
-                if (logoutItem) logoutItem.style.display = 'none';
-                if (userInfoItem) userInfoItem.style.display = 'none';
+                console.error('更新导航栏登录状态失败:', e);
+                // 错误时显示默认状态
+                ['login', 'register'].forEach(key => 
+                    elements[key] && (elements[key].style.display = 'block'));
+                ['logout', 'userInfo'].forEach(key => 
+                    elements[key] && (elements[key].style.display = 'none'));
             }
         }
         
-        //   退出函数
+        // 优化的退出函数
         window.logout = function() {
             try {
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
+                ['user', 'token', 'user_user', 'user_token', 'admin_user'].forEach(key => 
+                    localStorage.removeItem(key));
                 updateNavbarLoginStatus();
-                showNotification('  退出成功', 'success');
-                console.log('用户已  退出');
+                showNotification('退出成功', 'success');
             } catch (error) {
-                console.error('  退出失败:', error);
-                showNotification('  退出过程中出现错误', 'error');
+                console.error('退出失败:', error);
+                showNotification('退出过程中出现错误', 'error');
             }
         };
         
@@ -1805,45 +1800,34 @@
             }
         }
         
-        // 处理导航栏展开/折叠事件
+        // 优化的导航栏事件处理
         function setupNavbarEvents() {
-            const navbarToggler = document.querySelector('.navbar-toggler');
             const navbarCollapse = document.getElementById('navbarNav');
+            if (!navbarCollapse) return;
             
-            if (navbarToggler && navbarCollapse) {
-                navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    // 导航栏展开时，添加navbar-expanded类到body
-                    document.body.classList.add('navbar-expanded');
-                    console.log('导航栏展开，启用滚动');
+            // 导航栏状态切换
+            navbarCollapse.addEventListener('show.bs.collapse', () => 
+                document.body.classList.add('navbar-expanded'));
+            
+            navbarCollapse.addEventListener('hide.bs.collapse', () => 
+                document.body.classList.remove('navbar-expanded'));
+            
+            // 移动端点击链接自动收起
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 992) {
+                        bootstrap.Collapse.getInstance(navbarCollapse)?.hide();
+                    }
                 });
-                
-                navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    // 导航栏折叠时，移除navbar-expanded类
-                    document.body.classList.remove('navbar-expanded');
-                    console.log('导航栏折叠，恢复正常滚动');
-                });
-                
-                // 点击导航链接时自动折叠导航栏（移动端）
-                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        if (window.innerWidth < 992) {
-                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                            if (bsCollapse) {
-                                bsCollapse.hide();
-                            }
-                        }
-                    });
-                });
-            }
+            });
         }
         
-        // 页面加载时初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            safeInit();
-            setupNavbarEvents();
-            loadUserReviews();
-        });
+        // 页面加载时初始化 - 已合并到主DOMContentLoaded事件中
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     safeInit();
+        //     setupNavbarEvents();
+        //     loadUserReviews();
+        // });
         
         // 设置默认用户名
         function setDefaultUsername() {
@@ -2323,84 +2307,44 @@
             window.location.href = targetUrl;
         }
         
-        /**
-         * 检查聊天功能的登录状态
-         */
-        function checkLoginForChat() {
+        // 优化的登录检查函数
+        function checkLoginStatus() {
             const user = localStorage.getItem('user_user');
             const token = localStorage.getItem('user_token');
             
-            if (!user || !token) {
-                showNotification('请先登录后使用聊天功能', 'error');
-                setTimeout(() => {
-                    window.location.href = '/user-web/登录页面.html';
-                }, 1500);
-                return;
-            }
+            if (!user || !token) return null;
             
             try {
                 const userData = JSON.parse(user);
-                if (!userData.username) {
-                    showNotification('用户信息异常，请重新登录', 'error');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('token');
-                    setTimeout(() => {
-                        window.location.href = '/user-web/登录页面.html';
-                    }, 1500);
-                    return;
-                }
-                
-                // 登录验证通过，跳转到聊天页面
-                window.location.href = '/user-web/聊天.html';
+                return userData.username ? userData : null;
             } catch (e) {
-                showNotification('用户信息格式错误，请重新登录', 'error');
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
-                setTimeout(() => {
-                    window.location.href = '/user-web/登录页面.html';
-                }, 1500);
+                ['user', 'token', 'user_user', 'user_token'].forEach(key => 
+                    localStorage.removeItem(key));
+                return null;
             }
         }
         
-        /**
-         * 检查功能的登录状态并跳转到指定页面
-         * @param {string} targetUrl - 目标页面URL
-         * @param {string} featureName - 功能名称
-         */
-        function checkLoginForFeature(targetUrl, featureName) {
-            const user = localStorage.getItem('user_user');
-            const token = localStorage.getItem('user_token');
-            
-            if (!user || !token) {
-                showNotification(`请先登录后使用${featureName}功能`, 'error');
-                setTimeout(() => {
-                    window.location.href = '/user-web/登录页面.html';
-                }, 1500);
+        function redirectToLogin(message) {
+            showNotification(message, 'error');
+            setTimeout(() => window.location.href = '/user-web/登录页面.html', 1500);
+        }
+        
+        function checkLoginForChat() {
+            const userData = checkLoginStatus();
+            if (!userData) {
+                redirectToLogin('请先登录后使用聊天功能');
                 return;
             }
-            
-            try {
-                const userData = JSON.parse(user);
-                if (!userData.username) {
-                    showNotification('用户信息异常，请重新登录', 'error');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('token');
-                    setTimeout(() => {
-                        window.location.href = '/user-web/登录页面.html';
-                    }, 1500);
-                    return;
-                }
-                
-                // 登录验证通过，跳转到目标页面
-                window.location.href = targetUrl;
-            } catch (e) {
-                showNotification('用户信息格式错误，请重新登录', 'error');
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
-                setTimeout(() => {
-                    window.location.href = '/user-web/登录页面.html';
-                }, 1500);
+            window.location.href = '/user-web/聊天.html';
+        }
+        
+        function checkLoginForFeature(targetUrl, featureName) {
+            const userData = checkLoginStatus();
+            if (!userData) {
+                redirectToLogin(`请先登录后使用${featureName}功能`);
+                return;
             }
+            window.location.href = targetUrl;
         }
         
         // 页面加载时不强制要求登录，只在需要登录的功能触发时验证
@@ -2513,191 +2457,116 @@
             
             // 默认轮播图数据（作为备用）
             const defaultCarouselData = [
-                { title: "首页轮播图1", image_url: "./img/轮播1.jpg", is_active: true },
-                { title: "首页轮播图2", image_url: "./img/轮播2.jpg", is_active: true },
-                { title: "首页轮播图3", image_url: "./img/轮播3.jpg", is_active: true },
-                { title: "首页轮播图4", image_url: "./img/轮播4.jpg", is_active: true }
+                { title: "首页轮播图1", image_url: "../img/轮播8.png", is_active: true },
+                { title: "首页轮播图2", image_url: "../img/轮播4.png", is_active: true },
+                { title: "首页轮播图3", image_url: "../img/轮播6.png", is_active: true },
+                { title: "首页轮播图4", image_url: "../img/轮播3.png", is_active: true },
+                { title: "首页轮播图5", image_url: "../img/轮播1.png", is_active: true },
+                { title: "首页轮播图6", image_url: "../img/轮播9.png", is_active: true }
+
+                
             ];
 
-            /**
-             * 从服务器获取轮播图数据
-             * @returns {Promise} 返回轮播图数据
-             */
+            // 轮播图核心功能
             async function fetchCarouselData() {
                 try {
                     const response = await fetch('/api/user/carousel');
-                    if (!response.ok) {
-                        throw new Error('网络请求失败');
-                    }
                     const data = await response.json();
-                    if (data.success === true && Array.isArray(data.data)) {
-                        return data.data;
-                    } else {
-                        console.error('轮播图数据格式错误:', data);
-                        return defaultCarouselData;
-                    }
+                    return data.success && Array.isArray(data.data) ? data.data : defaultCarouselData;
                 } catch (error) {
                     console.error('获取轮播图数据失败:', error);
                     return defaultCarouselData;
                 }
             }
 
-            /**
-             * 生成轮播图内容
-             * @param {Array} carouselData - 轮播图数据数组
-             */
             function generateCarouselContent(carouselData) {
-                // 清空现有内容
                 pic.innerHTML = '';
-                
-                // 更新图片总数
                 totalImages = carouselData.length;
                 loadedImages = 0;
                 
-                // 创建轮播项
-                carouselData.forEach(function(item, index) {
-                    var li = document.createElement('li');
-                    var a = document.createElement('a');
-                    var img = document.createElement('img');
+                carouselData.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    const img = document.createElement('img');
                     
-                    // 设置链接
-                    a.href = '#'; // 可以根据实际需求设置链接地址
-                    
-                    // 设置图片（确保HTTPS协议）
                     img.src = fixImageUrl(item.image_url);
-                    img.alt = item.title;
-                    img.title = item.title;
-                    img.onerror = "this.src='https://picsum.photos/seed/tgcf" + (index + 1) + "/800/500';"; // 添加错误处理
+                    img.alt = img.title = item.title;
+                    img.onerror = () => img.src = `https://picsum.photos/seed/tgcf${index + 1}/800/500`;
                     
-                    // 检查图片加载状态
-                    if (img.complete) {
-                        imageLoaded();
-                    } else {
-                        img.addEventListener('load', imageLoaded);
-                    }
+                    img.complete ? imageLoaded() : img.addEventListener('load', imageLoaded);
                     
-                    // 组合元素
-                    a.appendChild(img);
-                    li.appendChild(a);
+                    li.innerHTML = `<a href="#">${img.outerHTML}</a>`;
                     pic.appendChild(li);
                 });
             }
 
             function imageLoaded() {
-                loadedImages++;
-                // 所有图片加载完成后再开始轮播
-                if (loadedImages === totalImages && totalImages > 0) {
-                    startCarousel();
-                }
+                if (++loadedImages === totalImages && totalImages > 0) startCarousel();
             }
-            
-            // 获取轮播图数据并生成内容
-            fetchCarouselData().then(generateCarouselContent);
+
+            function updateIndicators() {
+                lis.querySelectorAll('li').forEach((item, index) => {
+                    item.classList.toggle('selected', index === circle);
+                });
+            }
+
+            function goToSlide(index) {
+                num = circle = index;
+                animate(pic, -index * boxWidth);
+                updateIndicators();
+            }
+
+            function nextSlide() {
+                circle = (circle + 1) % totalImages;
+                num = circle;
+                animate(pic, -num * boxWidth);
+                updateIndicators();
+            }
+
+            function prevSlide() {
+                circle = circle === 0 ? totalImages - 1 : circle - 1;
+                num = circle;
+                animate(pic, -num * boxWidth);
+                updateIndicators();
+            }
+
+            function startAutoPlay() {
+                timer = setInterval(nextSlide, 3000);
+            }
 
             function startCarousel() {
-                // 动态生成轮播指示器
-                var children = pic.children;
-                for (var i = 0; i < children.length; i++) {
-                    var li = document.createElement("li");
-                    li.setAttribute("index", i);
+                // 生成指示器
+                for (let i = 0; i < totalImages; i++) {
+                    const li = document.createElement('li');
+                    li.addEventListener('click', () => goToSlide(i));
                     lis.appendChild(li);
-                    
-                    // 指示器点击事件
-                    li.addEventListener('click', function() {
-                        var index = this.getAttribute("index");
-                        num = index;
-                        circle = index;
-                        // 重置所有指示器样式
-                        var allLis = lis.querySelectorAll('li');
-                        allLis.forEach(function(item) {
-                            item.classList.remove("selected");
-                        });
-                        this.classList.add("selected");
-                        animate(pic, -index * boxWidth);
-                    });
                 }
-                // 默认选中第一个指示器
-                if (lis.querySelector('li')) {
-                    lis.querySelector('li').classList.add("selected");
-                }
-
-                // 复制第一张图用于无缝滚动
-                if (pic.firstElementChild) {
-                    var first = pic.firstElementChild.cloneNode(true);
-                    pic.appendChild(first);
-                }
-
-                // 启动自动播放
-                timer = setInterval(function() {
-                    // 模拟点击右侧按钮
-                    var clickEvent = new Event('click');
-                    right.dispatchEvent(clickEvent);
-                }, 5000);
+                updateIndicators();
+                startAutoPlay();
             }
 
-            // 鼠标移入显示箭头，停止自动播放
-            box.addEventListener('mouseenter', function() {
-                left.style.display = 'block';
-                right.style.display = 'block';
+            // 事件监听
+            box.addEventListener('mouseenter', () => {
+                left.style.display = right.style.display = 'block';
                 clearInterval(timer);
             });
 
-            // 鼠标移出隐藏箭头，继续自动播放
-            box.addEventListener('mouseleave', function() {
-                left.style.display = 'none';
-                right.style.display = 'none';
-                if (loadedImages === totalImages) { // 确保图片加载完成
-                    timer = setInterval(function() {
-                        // 模拟点击右侧按钮
-                        var clickEvent = new Event('click');
-                        right.dispatchEvent(clickEvent);
-                    }, 5000);
-                }
+            box.addEventListener('mouseleave', () => {
+                left.style.display = right.style.display = 'none';
+                if (loadedImages === totalImages) startAutoPlay();
             });
 
-            // 右箭头点击事件
-            right.addEventListener("click", function() {
-                if (num >= pic.children.length - 1) {
-                    pic.style.left = '0px';
-                    num = 0;
-                }
-                num++;
-                animate(pic, -num * boxWidth);
-                circle++;
-                var allLis = lis.querySelectorAll('li');
-                if (circle >= allLis.length) {
-                    circle = 0;
-                }
-                // 更新指示器
-                allLis.forEach(function(item) {
-                    item.classList.remove("selected");
-                });
-                if (allLis[circle]) {
-                    allLis[circle].classList.add("selected");
-                }
+            right.addEventListener('click', (e) => {
+                e.preventDefault();
+                nextSlide();
             });
 
-            // 左箭头点击事件
-            left.addEventListener("click", function() {
-                if (num <= 0) {
-                    num = pic.children.length - 1;
-                    pic.style.left = -num * boxWidth + 'px';
-                }
-                num--;
-                animate(pic, -num * boxWidth);
-                circle--;
-                allLis = lis.querySelectorAll('li');
-                if (circle < 0) {
-                    circle = allLis.length - 1;
-                }
-                // 更新指示器
-                allLis.forEach(function(item) {
-                    item.classList.remove("selected");
-                });
-                if (allLis[circle]) {
-                    allLis[circle].classList.add("selected");
-                }
+            left.addEventListener('click', (e) => {
+                e.preventDefault();
+                prevSlide();
             });
+
+            // 初始化
+            fetchCarouselData().then(generateCarouselContent);
 
             // 侧边栏交互
             var sideItems = document.querySelectorAll('.side>div:not(.five)');
@@ -2705,7 +2574,8 @@
                 item.addEventListener('click', function() {
                     switch(index) {
                     case 0: 
-                        window.location.href = 'tv.longlong.baby';
+                        // 跳转到tv.longlong.baby并自动填入密码0122
+                        window.location.href = 'http://tv.longlong.baby?password=0122';
                         break;
                     case 1: 
                         history.back();
@@ -3005,6 +2875,12 @@
             document.addEventListener('DOMContentLoaded', async function() {
                 // 初始化页面内容
                 initPage();
+                
+                // 初始化导航栏事件
+                setupNavbarEvents();
+                
+                // 加载用户评价
+                loadUserReviews();
                 
                 // 从服务器加载内容
                 await loadPageContent();

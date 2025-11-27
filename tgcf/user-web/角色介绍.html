@@ -490,28 +490,13 @@
         <h2 class="section-title">角色介绍</h2>
         
         <div class="row row-responsive" id="charactersContainer">
-            <!-- 默认角色卡片 -->
-            <div class="col-md-6 col-responsive-6">
-                <div class="character-card card-responsive">
-                    <img src="../img/谢伶.jpg" class="character-img img-responsive" alt="谢怜">
-                    <div class="character-info card-body-responsive">
-                        <h3 class="character-name card-title-responsive">谢怜</h3>
-                        <p class="character-desc">
-                            仙乐国太子。一心想拯救苍生，却连自己的国家和父母都守护不了。白无相对谢怜的打击，差点让谢怜成为了第二个白无相。不过最终谢怜知道自己不是同一种人，他名字中的这个"怜"，也告诉了大家，无论经历多么残酷的事情，他还是那个怜悯苍生的殿下。
-                        </p>
+            <!-- 加载状态 -->
+            <div class="col-12 text-center">
+                <div class="loading-spinner" style="padding: 40px;">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">加载中...</span>
                     </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6 col-responsive-6">
-                <div class="character-card card-responsive">
-                    <img src="../img/花城.jpg" class="character-img img-responsive" alt="花城">
-                    <div class="character-info card-body-responsive">
-                        <h3 class="character-name card-title-responsive">花城</h3>
-                        <p class="character-desc">
-                            从小受尽虐待，憎恶世界，一天想自杀，特地挑仙乐太子游街期间跳楼，意图拉一个垫背，爬上城墙后看见扮作悦神武者的谢怜后忘记自杀，不小心掉了下去，被谢怜接住，自此成为仙乐太子最忠诚的信徒。之后历经磨难，炼出血器，杀出重围，成为了绝境鬼王。
-                        </p>
-                    </div>
+                    <p class="mt-3 text-muted">正在加载角色数据...</p>
                 </div>
             </div>
         </div>
@@ -520,7 +505,13 @@
         <div class="quotes-section" style="margin-top: 80px;">
             <h2 class="section-title">人物经典语录</h2>
             <div id="quotesContainer" class="quotes-container">
-                <!-- 动态加载的语录内容 -->
+                <!-- 加载状态 -->
+                <div class="text-center" style="padding: 40px;">
+                    <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-3 text-muted">正在加载语录数据...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -538,10 +529,56 @@
                     }
                 }
                 
-                console.log('API数据无效，保持默认内容');
+                // API数据无效，使用默认角色数据
+                renderDefaultCharacters();
             } catch (error) {
                 console.error('获取角色数据失败:', error);
+                // 加载失败时使用默认角色数据
+                renderDefaultCharacters();
             }
+        }
+        
+        function renderDefaultCharacters() {
+            const defaultCharacters = [
+                {
+                    name: '谢怜',
+                    image_url: '../img/谢伶1.png',
+                    description: '仙乐国太子。一心想拯救苍生，却连自己的国家和父母都守护不了。白无相对谢怜的打击，差点让谢怜成为了第二个白无相。不过最终谢怜知道自己不是同一种人，他名字中的这个"怜"，也告诉了大家，无论经历多么残酷的事情，他还是那个怜悯苍生的殿下。',
+                    personality: '善良、坚韧、慈悲、执着'
+                },
+                {
+                    name: '花城',
+                    image_url: '../img/花城1.png',
+                    description: '从小受尽虐待，憎恶世界，一天想自杀，特地挑仙乐太子游街期间跳楼，意图拉一个垫背，爬上城墙后看见扮作悦神武者的谢怜后忘记自杀，不小心掉了下去，被谢怜接住，自此成为仙乐太子最忠诚的信徒。之后历经磨难，炼出血器，杀出重围，成为了绝境鬼王。',
+                    personality: '忠诚、强大、深情、执着'
+                },
+                {
+                    name: '君吾（白无相）',
+                    image_url: '../img/君吾.png',
+                    description: '仙乐国的前代神官，因对人间失望而堕落为白无相。他试图让谢怜经历与他相似的痛苦，以此来证明人性的黑暗。最终被谢怜和花城联手击败。',
+                    personality: '复杂、矛盾、强大、绝望'
+                },
+                {
+                    name: '师青玄',
+                    image_url: '../img/师青玄.png',
+                    description: '风师大人，性格活泼开朗，重情重义。与贺玄有着复杂的恩怨情仇，最终选择放下过去，重新开始。',
+                    personality: '开朗、重情义、乐观、善良'
+                },
+                {
+                    name: '风信',
+                    image_url: '../img/风信 1.png',
+                    description: '谢怜的忠实部下，性格直率，对谢怜忠心耿耿。在谢怜最困难的时候依然不离不弃。',
+                    personality: '忠诚、直率、勇敢、重情义'
+                },
+                {
+                    name: '慕情',
+                    image_url: '../img/慕情.png',
+                    description: '谢怜的另一位部下，性格较为内敛，但对谢怜同样忠诚。在关键时刻总能给予谢怜支持。',
+                    personality: '内敛、忠诚、细心、可靠'
+                }
+            ];
+            
+            renderCharacters(defaultCharacters);
         }
         
         function renderCharacters(characters) {
@@ -552,12 +589,19 @@
             
             container.innerHTML = '';
             
-            characters.forEach(character => {
+            characters.forEach((character, index) => {
                 const characterCard = document.createElement('div');
                 characterCard.className = 'col-md-6';
+                
+                const imgSrc = character.image_url || '../img/default.jpg';
+                
                 characterCard.innerHTML = `
                     <div class="character-card">
-                        <img src="${character.image_url || '../img/default.jpg'}" class="character-img" alt="${character.name}">
+                        <img src="${imgSrc}" 
+                             class="character-img" 
+                             alt="${character.name}"
+                             loading="lazy"
+                             onerror="this.style.display='none';">
                         <div class="character-info">
                             <h3 class="character-name">${character.name}</h3>
                             <p class="character-desc">
@@ -571,65 +615,81 @@
             });
         }
         
+        // 优化的导航栏登录状态更新
         function updateNavbarLoginStatus() {
-            const user = localStorage.getItem('user_user');
-            const loginItem = document.getElementById('loginItem');
-            const registerItem = document.getElementById('registerItem');
-            const logoutItem = document.getElementById('logoutItem');
-            const userInfo = document.getElementById('userInfo');
-            const welcomeText = document.getElementById('welcomeText');
+            const elements = {
+                login: document.getElementById('loginItem'),
+                register: document.getElementById('registerItem'),
+                logout: document.getElementById('logoutItem'),
+                userInfo: document.getElementById('userInfo'),
+                welcome: document.getElementById('welcomeText')
+            };
             
-            if (user) {
-                try {
-                    const parsedUser = JSON.parse(user);
-                    if (loginItem) loginItem.style.display = 'none';
-                    if (registerItem) registerItem.style.display = 'none';
-                    if (logoutItem) logoutItem.style.display = 'block';
-                    if (userInfo) userInfo.style.display = 'block';
-                    if (welcomeText) welcomeText.textContent = `欢迎, ${parsedUser.username || '用户'}`;
-                } catch (e) {
-                    console.error('解析用户信息失败:', e);
-                }
-            } else {
-                if (loginItem) loginItem.style.display = 'block';
-                if (registerItem) registerItem.style.display = 'block';
-                if (logoutItem) logoutItem.style.display = 'none';
-                if (userInfo) userInfo.style.display = 'none';
+            try {
+                const user = localStorage.getItem('user_user');
+                const isLoggedIn = user && user !== 'undefined' && user !== 'null';
+                const userData = isLoggedIn ? JSON.parse(user) : null;
+                
+                // 统一设置显示状态
+                elements.login && (elements.login.style.display = isLoggedIn ? 'none' : 'block');
+                elements.register && (elements.register.style.display = isLoggedIn ? 'none' : 'block');
+                elements.logout && (elements.logout.style.display = isLoggedIn ? 'block' : 'none');
+                elements.userInfo && (elements.userInfo.style.display = isLoggedIn ? 'block' : 'none');
+                elements.welcome && isLoggedIn && (elements.welcome.textContent = `欢迎, ${userData?.username || '用户'}`);
+                
+            } catch (e) {
+                console.error('更新导航栏登录状态失败:', e);
+                // 错误时显示默认状态
+                ['login', 'register'].forEach(key => 
+                    elements[key] && (elements[key].style.display = 'block'));
+                ['logout', 'userInfo'].forEach(key => 
+                    elements[key] && (elements[key].style.display = 'none'));
             }
         }
         
+        // 优化的登录检查函数
         function checkLoginStatus() {
+            const user = localStorage.getItem('user_user');
+            const token = localStorage.getItem('user_token');
+            
+            if (!user || !token) return null;
+            
             try {
-                const userData = localStorage.getItem('user_user');
-                const token = localStorage.getItem('user_token');
-                return userData && token;
-            } catch (error) {
-                console.error('检查登录状态失败:', error);
-                return false;
+                const userData = JSON.parse(user);
+                return userData.username ? userData : null;
+            } catch (e) {
+                ['user', 'token', 'user_user', 'user_token'].forEach(key => 
+                    localStorage.removeItem(key));
+                return null;
             }
+        }
+        
+        function redirectToLogin(message) {
+            alert(message);
+            window.location.href = '/user-web/登录页面.html';
         }
         
         function checkLoginForFeature(pageUrl, featureName) {
-            if (checkLoginStatus()) {
-                window.location.href = pageUrl;
-            } else {
-                alert(`请先登录以使用${featureName}功能`);
-                window.location.href = '/user-web/登录页面.html';
+            const userData = checkLoginStatus();
+            if (!userData) {
+                redirectToLogin(`请先登录以使用${featureName}功能`);
+                return;
             }
+            window.location.href = pageUrl;
         }
         
         function checkLoginForChat() {
-            if (checkLoginStatus()) {
-                window.location.href = '/user-web/聊天.html';
-            } else {
-                alert('请先登录以使用在线聊天功能');
-                window.location.href = '/user-web/登录页面.html';
+            const userData = checkLoginStatus();
+            if (!userData) {
+                redirectToLogin('请先登录以使用在线聊天功能');
+                return;
             }
+            window.location.href = '/user-web/聊天.html';
         }
         
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
+            ['user', 'token', 'user_user', 'user_token'].forEach(key => 
+                localStorage.removeItem(key));
             updateNavbarLoginStatus();
             alert('退出成功');
         }
@@ -659,22 +719,35 @@
             const container = document.getElementById('quotesContainer');
             if (!container) return;
             
-            container.innerHTML = quotes.map(quote => `
-                <div class="character-quotes">
-                    <div class="quotes-header">
-                        <img src="${quote.image_url || '../img/default.jpg'}" class="quotes-avatar" alt="${quote.character_name}">
-                        <h3 class="quotes-name">${quote.character_name}</h3>
+            container.innerHTML = quotes.map((quote, index) => {
+                const imgSrc = quote.image_url || '../img/default.jpg';
+                const fallbackSrc = `https://picsum.photos/seed/quote${index}/60/60`;
+                
+                return `
+                    <div class="character-quotes">
+                        <div class="quotes-header">
+                            <img data-src="${imgSrc}" 
+                                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999' font-size='10'%3E加载中%3C/text%3E%3C/svg%3E"
+                                 class="quotes-avatar" 
+                                 alt="${quote.character_name}"
+                                 loading="lazy"
+                                 onerror="this.src='${fallbackSrc}'; this.onerror=null;">
+                            <h3 class="quotes-name">${quote.character_name}</h3>
+                        </div>
+                        <div class="quotes-content">${quote.content}</div>
                     </div>
-                    <div class="quotes-content">${quote.content}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+            
+            // 启动懒加载
+            lazyLoadImages();
         }
         
         function renderDefaultQuotes() {
             const defaultQuotes = [
                 {
                     character_name: '🌟 谢怜',
-                    image_url: '../img/谢伶.jpg',
+                    image_url: '../img/谢伶1.png',
                     content: `身在无间，心在桃源。
 是非在己，毁誉由人，得失不论。
 我虽身在无间，却心向桃源。但如果桃源本身就是无间呢？
@@ -683,7 +756,7 @@
                 },
                 {
                     character_name: '🔥 花城',
-                    image_url: '../img/花城.jpg',
+                    image_url: '../img/花城1.png',
                     content: `为你明灯三千，为你花开满城。
 我永远是你最忠诚的信徒。
 殿下，我没有骗你，我真的…… 等了你八百年。
@@ -701,28 +774,21 @@
                 },
                 {
                     character_name: '🦋 师青玄',
-                    image_url: '../img/师青玄.jpg',
+                    image_url: '../img/师青玄.png',
                     content: `风光无限是你，跌落尘埃也是你，重点是你，而不是怎样的你。
 交朋友，看的是心，不是身份。
 管他什么黑水白水文文黑黑，本风师大人看上的朋友，就是最好的朋友！`
                 },
                 {
-                    character_name: '💧 贺玄（黑水沉舟）',
-                    image_url: '../img/绿龙.jpg',
-                    content: `欠债还钱，天经地义。
-我这一生，所求不多，只要该有的，都还给我就好。
-有些债，必须亲自讨回来。`
-                },
-                {
                     character_name: '🦊 风信',
-                    image_url: '../img/风信.jpg',
+                    image_url: '../img/风信 1.png',
                     content: `殿下，你善良是好事，但你的善良，有时候真的很伤人。
 这么多年了，你还是老样子，一点都没变。
 我虽然离开你了，但我从来没怀过你。`
                 },
                 {
                     character_name: '🐶 慕情',
-                    image_url: '../img/慕情.jpg',
+                    image_url: '../img/慕情.png',
                     content: `能力不够，就别硬撑。
 我慕情做事，问心无愧。
 有些人，有些事，不是想忘就能忘的。`
@@ -732,46 +798,73 @@
             renderQuotes(defaultQuotes);
         }
         
+        // 图片懒加载优化
+        function lazyLoadImages() {
+            const images = document.querySelectorAll('img[data-src]');
+            
+            if ('IntersectionObserver' in window) {
+                const imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            imageObserver.unobserve(img);
+                        }
+                    });
+                });
+                
+                images.forEach(img => imageObserver.observe(img));
+            } else {
+                // 降级处理
+                images.forEach(img => {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                });
+            }
+        }
+        
+        // 预加载关键图片
+        function preloadCriticalImages() {
+            const criticalImages = [
+                '../img/谢伶1.png',
+                '../img/花城1.png'
+            ];
+            
+            criticalImages.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
+            preloadCriticalImages();
             updateNavbarLoginStatus();
             loadCharacters();
             loadQuotes();
             setupNavbarEvents();
         });
         
-        /**
-         * 处理导航栏展开/折叠事件
-         */
+        // 优化的导航栏事件处理
         function setupNavbarEvents() {
-            const navbarToggler = document.querySelector('.navbar-toggler');
             const navbarCollapse = document.getElementById('navbarNav');
+            if (!navbarCollapse) return;
             
-            if (navbarToggler && navbarCollapse) {
-                navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    // 导航栏展开时，添加navbar-expanded类到body
-                    document.body.classList.add('navbar-expanded');
-                    console.log('导航栏展开，启用滚动');
+            // 导航栏状态切换
+            navbarCollapse.addEventListener('show.bs.collapse', () => 
+                document.body.classList.add('navbar-expanded'));
+            
+            navbarCollapse.addEventListener('hide.bs.collapse', () => 
+                document.body.classList.remove('navbar-expanded'));
+            
+            // 移动端点击链接自动收起
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 992) {
+                        bootstrap.Collapse.getInstance(navbarCollapse)?.hide();
+                    }
                 });
-                
-                navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    // 导航栏折叠时，移除navbar-expanded类
-                    document.body.classList.remove('navbar-expanded');
-                    console.log('导航栏折叠，恢复正常滚动');
-                });
-                
-                // 点击导航链接时自动折叠导航栏（移动端）
-                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        if (window.innerWidth < 992) {
-                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                            if (bsCollapse) {
-                                bsCollapse.hide();
-                            }
-                        }
-                    });
-                });
-            }
+            });
         }
     </script>
     

@@ -974,7 +974,7 @@
 
     <!-- 侧边工具栏 -->
     <div class="side-toolbar">
-        <div class="tool-item one" title="观看" onclick="window.location.href='tv.longlong.baby'">
+        <div class="tool-item one" title="观看" onclick="window.location.href='http://tv.longlong.baby?password=0122'">
             <i class="bi bi-eyeglasses"></i>
             <div class="text">观看</div>
         </div>
@@ -1614,92 +1614,63 @@
                 }
             }
             
-            /**
-             * 检查并更新导航栏登录状态
-             */
+            // 优化的导航栏登录状态更新
             function updateNavbarLoginStatus() {
-                const user = localStorage.getItem('user_user');
-                const adminUser = localStorage.getItem('admin_user');
-                const loginItem = document.getElementById('loginItem');
-                const registerItem = document.getElementById('registerItem');
-                const logoutItem = document.getElementById('logoutItem');
-                const userInfoItem = document.getElementById('userInfoItem');
-                const welcomeText = document.getElementById('welcomeText');
+                const elements = {
+                    login: document.getElementById('loginItem'),
+                    register: document.getElementById('registerItem'),
+                    logout: document.getElementById('logoutItem'),
+                    userInfo: document.getElementById('userInfoItem'),
+                    welcome: document.getElementById('welcomeText')
+                };
                 
                 try {
-                    // 检查是否有用户登录（普通用户或管理员）
-                    let loggedInUser = null;
-                    if (user && user !== 'undefined' && user !== 'null') {
-                        loggedInUser = JSON.parse(user);
-                    } else if (adminUser && adminUser !== 'undefined' && adminUser !== 'null') {
-                        loggedInUser = JSON.parse(adminUser);
-                    }
+                    const user = localStorage.getItem('user_user');
+                    const adminUser = localStorage.getItem('admin_user');
+                    const loggedInUser = [user, adminUser]
+                        .find(u => u && u !== 'undefined' && u !== 'null');
                     
-                    if (loggedInUser) {
-                        // 用户已登录，显示退出按钮和欢迎信息
-                        if (loginItem) loginItem.style.display = 'none';
-                        if (registerItem) registerItem.style.display = 'none';
-                        if (logoutItem) logoutItem.style.display = 'block';
-                        if (userInfoItem) userInfoItem.style.display = 'block';
-                        if (welcomeText) welcomeText.textContent = `欢迎 ${loggedInUser.username || '用户'}`;
-                    } else {
-                        // 用户未登录，显示登录和注册按钮
-                        if (loginItem) loginItem.style.display = 'block';
-                        if (registerItem) registerItem.style.display = 'block';
-                        if (logoutItem) logoutItem.style.display = 'none';
-                        if (userInfoItem) userInfoItem.style.display = 'none';
-                    }
+                    const isLoggedIn = !!loggedInUser;
+                    const userData = isLoggedIn ? JSON.parse(loggedInUser) : null;
+                    
+                    // 统一设置显示状态
+                    elements.login && (elements.login.style.display = isLoggedIn ? 'none' : 'block');
+                    elements.register && (elements.register.style.display = isLoggedIn ? 'none' : 'block');
+                    elements.logout && (elements.logout.style.display = isLoggedIn ? 'block' : 'none');
+                    elements.userInfo && (elements.userInfo.style.display = isLoggedIn ? 'block' : 'none');
+                    elements.welcome && isLoggedIn && (elements.welcome.textContent = `欢迎 ${userData?.username || '用户'}`);
+                    
                 } catch (e) {
-                    console.error('更新导航栏登录状态时出错:', e);
-                    // 出错时默认显示登录和注册按钮
-                    if (loginItem) loginItem.style.display = 'block';
-                    if (registerItem) registerItem.style.display = 'block';
-                    if (logoutItem) logoutItem.style.display = 'none';
-                    if (userInfoItem) userInfoItem.style.display = 'none';
+                    console.error('更新导航栏登录状态失败:', e);
+                    // 错误时显示默认状态
+                    ['login', 'register'].forEach(key => 
+                        elements[key] && (elements[key].style.display = 'block'));
+                    ['logout', 'userInfo'].forEach(key => 
+                        elements[key] && (elements[key].style.display = 'none'));
                 }
             }
             
-            /**
-             * 退出登录函数
-             */
+            // 优化的退出函数
             window.logout = function() {
                 try {
-                    // 检查当前登录的是普通用户还是管理员
-                    const user = localStorage.getItem('user_user');
-                    const adminUser = localStorage.getItem('admin_user');
-                    
-                    if (user && user !== 'undefined' && user !== 'null') {
-                        // 普通用户退出，只清除普通用户信息
-                        localStorage.removeItem('user_user');
-                        localStorage.removeItem('user_token');
-                    } else if (adminUser && adminUser !== 'undefined' && adminUser !== 'null') {
-                        // 管理员退出，只清除管理员信息
-                        localStorage.removeItem('admin_user');
-                        localStorage.removeItem('admin_token');
-                    }
-                    
+                    ['user', 'token', 'user_user', 'user_token', 'admin_user', 'admin_token'].forEach(key => 
+                        localStorage.removeItem(key));
                     updateNavbarLoginStatus();
                     showNotification('退出成功', 'success');
-                    console.log('用户已退出');
                 } catch (error) {
                     console.error('退出失败:', error);
                     showNotification('退出过程中出现错误', 'error');
                 }
             };
             
-            /**
-             * 检查登录状态并重定向
-             */
+            // 优化的登录检查函数
             window.checkLoginAndRedirect = function(targetUrl) {
-                // 检查是否有用户登录（普通用户或管理员）
                 const userToken = localStorage.getItem('user_token');
                 const adminToken = localStorage.getItem('admin_token');
                 
                 if (!userToken && !adminToken) {
                     showNotification('请先登录后再访问该功能', 'error');
-                    setTimeout(() => {
-                        window.location.href = '/user-web/登录页面.html';
-                    }, 2000);
+                    setTimeout(() => window.location.href = '/user-web/登录页面.html', 2000);
                     return;
                 }
                 window.location.href = targetUrl;
@@ -1711,41 +1682,30 @@
             // 执行初始化
             await init();
             
-            // 设置导航栏事件
-            setupNavbarEvents();
+            // 导航栏事件已在DOMContentLoaded中设置，无需重复调用
+            // setupNavbarEvents();
         });
         
-        // 处理导航栏展开/折叠事件
+        // 优化的导航栏事件处理
         function setupNavbarEvents() {
-            const navbarToggler = document.querySelector('.navbar-toggler');
             const navbarCollapse = document.getElementById('navbarNav');
+            if (!navbarCollapse) return;
             
-            if (navbarToggler && navbarCollapse) {
-                navbarCollapse.addEventListener('show.bs.collapse', function() {
-                    // 导航栏展开时，添加navbar-expanded类到body
-                    document.body.classList.add('navbar-expanded');
-                    console.log('导航栏展开，启用滚动');
+            // 导航栏状态切换
+            navbarCollapse.addEventListener('show.bs.collapse', () => 
+                document.body.classList.add('navbar-expanded'));
+            
+            navbarCollapse.addEventListener('hide.bs.collapse', () => 
+                document.body.classList.remove('navbar-expanded'));
+            
+            // 移动端点击链接自动收起
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 992) {
+                        bootstrap.Collapse.getInstance(navbarCollapse)?.hide();
+                    }
                 });
-                
-                navbarCollapse.addEventListener('hide.bs.collapse', function() {
-                    // 导航栏折叠时，移除navbar-expanded类
-                    document.body.classList.remove('navbar-expanded');
-                    console.log('导航栏折叠，恢复正常滚动');
-                });
-                
-                // 点击导航链接时自动折叠导航栏（移动端）
-                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        if (window.innerWidth < 992) {
-                            const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                            if (bsCollapse) {
-                                bsCollapse.hide();
-                            }
-                        }
-                    });
-                });
-            }
+            });
         }
     </script>
 </body>

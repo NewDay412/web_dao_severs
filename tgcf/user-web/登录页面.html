@@ -629,7 +629,9 @@
             // 检查用户角色
             const user = result.user || (result.data ? result.data.user : {});
             const token = result.token || (result.data ? result.data.token : null);
-            const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+            
+            // 更严格的角色判断逻辑：明确检查是否为管理员，否则默认为普通用户
+            const isAdmin = user.role && (user.role === 'admin' || user.role === 'super_admin');
             
             // 不自动清除其他类型的登录信息，允许同时登录
             // 只存储当前登录的用户信息，保留其他类型的登录状态
@@ -700,10 +702,17 @@
       // 关闭弹窗并跳转
       function closeModal() {
         document.getElementById("successModal").classList.remove("show");
-        const isAdmin = localStorage.getItem("admin_role") === "admin" || localStorage.getItem("admin_role") === "super_admin";
-        if (isAdmin) {
+        // 检查localStorage中的角色信息决定跳转页面
+        // 优先检查用户角色，如果用户已登录则跳转用户首页
+        const userRole = localStorage.getItem("user_role");
+        const adminRole = localStorage.getItem("admin_role");
+        
+        if (userRole) {
+          window.location.href = "/user-web/天官赐福首页.html";
+        } else if (adminRole) {
           window.location.href = "/admin-web/admin.html";
         } else {
+          // 默认跳转到用户首页
           window.location.href = "/user-web/天官赐福首页.html";
         }
       }
